@@ -68,6 +68,7 @@
 //     return Response.json({ error: "Invalid method" }, { status: 405 });
 //   }
 // };
+
 import { Chat } from "../../models/chats.model";
 import { User } from "../../models/user.model";
 import { authenticate } from "../../shopify.server";
@@ -84,13 +85,14 @@ export const loader = async ({ request }) => {
   }
   const customerId = user._id;
 
+
   try {
     const chats = await Chat.find({ customerId });
     console.log('chats',chats);
     if (!chats) {
       return Response.json({ message: "No chats found", status: 404  });
     }
-    return Response.json({ chats , status : 200 });
+    return Response.json({ chats ,userId:customerId,role:user.role, status : 200 });
   } catch (error) {
     console.error(error);
     return new Response(
@@ -106,11 +108,11 @@ export const action = async ({ request }) => {
 
      if (request.method == "POST") {
       const {userId} = await request.json();
-      console.log('userid--',userId);
+      // console.log('userid--',userId);  
       const customerId = userId;
       try {
         const chats = await Chat.find({ customerId });
-        console.log('chats',chats);
+        // console.log('chats',chats);
         if (!chats) {
           return Response.json({ message: "No chats found", status: 404  });
         }
@@ -189,3 +191,80 @@ export const action = async ({ request }) => {
      }
 
 };
+
+
+import { createServer } from "http";
+import { Server } from "socket.io";
+import express from "express";
+// import { Chat } from "../../models/chats.model";
+// import { User } from "../../models/user.model";
+// import { authenticate } from "../../shopify.server.js"; 
+
+const app = express();
+const server = createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "*", 
+    methods: ["GET", "POST"],
+    allowedHeaders: ["Content-Type"],
+  },
+});
+
+
+
+const onlineUsers = new Map();
+
+io.on("connection", (socket) => {
+  console.log("A user connected:", socket.id);
+  socket.on("joinChat", (userId) => {
+    console.log("--------------------------------------",userId)
+    onlineUsers.set(userId, socket.id);
+    console.log(`User ${userId} joined`);
+  });
+
+  socket.on("sendMessage", async ({ userId, message }) => {
+    console.log('message',message);
+    try {
+      let user = await User.findById(userId);
+      if (!user) {
+        return;
+      }
+
+      let chat = await Chat.findOne({ customerId: userId });
+
+      if (chat) {
+        chat.messages.push({
+          sender: "support",
+          message,
+        });
+      } else {
+        chat = new Chat({
+          customerId: userId,
+          messages: [{ sender: "support", message }],
+        });
+      }
+
+      await chat.save();
+      const dataa = [chat]
+    
+      io.emit("newMessage", dataa);
+
+      console.log(`New message from support to ${userId}: ${message}`);
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
+  });
+
+  socket.on("disconnect", () => {
+    console.log("User disconnected:", socket.id);
+    onlineUsers.forEach((value, key) => {
+      if (value === socket.id) {
+        onlineUsers.delete(key);
+      }
+    });
+  });
+});
+
+server.listen(3000, () => {
+  console.log("Server running on port 5000");
+});

@@ -34,10 +34,13 @@ export const loader = async ({ request }) => {
 
 export const action = async ({ request }) => {
   try {
-    if (request.method == "POST") {
-      const { customerEmail } = await request.json();
-      if(!customerEmail){
-        return Response.json({ message: "email is required", status:400})
+    if (request.method === "POST") {
+      const { customerEmail, role } = await request.json();
+      console.log("customerEmail--", customerEmail);
+      console.log("role--", role);
+
+      if (!customerEmail) {
+        return Response.json({ message: "Email is required", status: 400 });
       }
 
       const { admin, session } = await authenticate.admin(request);
@@ -46,44 +49,63 @@ export const action = async ({ request }) => {
 
       let user = await User.findOne({ email: session.shop });
 
+      const existingCustomer = await User.findOne({ customer_email: customerEmail });
+      if (existingCustomer) {
+        return Response.json({ message: "This customer email already exists", status: 400 });
+      }
+
+      const existingSupport = await User.findOne({ role: "support" });
+
+      if (existingSupport && role === "support") {
+        return Response.json({ message: "A support user already exists", status: 400 });
+      }
+
       if (!user) {
         user = new User({
           name: shopData.name,
           email: session.shop,
           customer_email: customerEmail,
           storeid: shopData.id,
-          role: "customer",
+          role: role,
         });
         await user.save();
-        const message = new Chat({
-          customerId: user._id,
-          messages: {
-            sender: "support",
-            message: "Hello",
-          },
-        });
 
-        await message.save();
+        if (role === "customer") {
+          const message = new Chat({
+            customerId: user._id,
+            messages: {
+              sender: "support",
+              message: "Hello",
+            },
+          });
+          await message.save();
+        }
+
         return Response.json({
-          message: "customer email is found",
+          message: "User registered successfully",
           status: 200,
         });
       }
 
       if (user) {
+        
+        if (role === "support" && existingSupport) {
+          return Response.json({ message: "A support user already exists", status: 400 });
+        }
+
         user.customer_email = customerEmail;
+        user.role = role;
         await user.save();
+
         return Response.json({
-          message: "customer email is found",
+          message: "User updated successfully",
           status: 200,
         });
       }
     }
   } catch (error) {
     console.log("error---", error);
-    return Response.json(
-      { error: "Failed to fetch shop details" },
-      { status: 500 },
-    );
+    return Response.json({ error: "Failed to fetch shop details" }, { status: 500 });
   }
 };
+
