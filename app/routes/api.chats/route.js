@@ -222,38 +222,69 @@ io.on("connection", (socket) => {
     console.log(`User ${userId} joined`);
   });
 
-  socket.on("sendMessage", async ({ userId, message }) => {
-    console.log('message',message);
+  // socket.on("sendMessage", async ({ userId, message }) => {
+  //   console.log('message',message);
+  //   try {
+  //     let user = await User.findById(userId);
+  //     if (!user) {
+  //       return;
+  //     }
+
+  //     let chat = await Chat.findOne({ customerId: userId });
+
+  //     if (chat) {
+  //       chat.messages.push({
+  //         sender: "support",
+  //         message,
+  //       });
+  //     } else {
+  //       chat = new Chat({
+  //         customerId: userId,
+  //         messages: [{ sender: "support", message }],
+  //       });
+  //     }
+
+  //     await chat.save();
+  //     const dataa = [chat]
+    
+  //     io.emit("newMessage", dataa);
+
+  //     console.log(`New message from support to ${userId}: ${message}`);
+  //   } catch (error) {
+  //     console.error("Error sending message:", error);
+  //   }
+  // });
+  socket.on("sendMessage", async ({ userId, message, file }) => {
     try {
       let user = await User.findById(userId);
       if (!user) {
         return;
       }
-
+  
       let chat = await Chat.findOne({ customerId: userId });
-
+  
       if (chat) {
         chat.messages.push({
           sender: "support",
-          message,
+          message: message || "", // If there's no message, store an empty string
+          file: file || "", // Store file URL if provided
         });
       } else {
         chat = new Chat({
           customerId: userId,
-          messages: [{ sender: "support", message }],
+          messages: [{ sender: "support", message: message || "", file: file || "" }],
         });
       }
-
+  
       await chat.save();
-      const dataa = [chat]
-    
-      io.emit("newMessage", dataa);
-
-      console.log(`New message from support to ${userId}: ${message}`);
+      io.emit("newMessage", [chat]); // Send updated chat to frontend
+  
+      console.log(`New message from support to ${userId}: ${message || "File uploaded"}`);
     } catch (error) {
       console.error("Error sending message:", error);
     }
   });
+  
   socket.on("typing", ({ userId, role }) => {
     socket.broadcast.emit("userTyping", { userId, role });
   });

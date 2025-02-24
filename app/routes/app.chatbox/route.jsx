@@ -346,6 +346,8 @@ export default function Chat() {
   const location = useLocation();
   const [userId, setUserId] = useState("");
   const [role, setRole] = useState("support");
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
 
   useEffect(() => {
     const userIds = location.state;
@@ -403,9 +405,37 @@ export default function Chat() {
   };
 
   const handleSend = async () => {
-    if (!message.trim()) return;
-    socket.emit("sendMessage", { userId, message, role });
+    if (!message.trim() && !selectedFile) return;  
+//
+    let fileUrl = "";
+    if (selectedFile) {
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+      formData.append("upload_preset", "chatImage"); 
+
+      const response = await fetch("https://api.cloudinary.com/v1_1/dxhnwndac/image/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+      fileUrl = data.secure_url; 
+    }
+
+    socket.emit("sendMessage", { userId, message, file: fileUrl, role });
+
     setMessage("");
+    setSelectedFile(null);
+    setPreviewUrl(null);
+
+  };
+
+  const handleImageChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+      setPreviewUrl(URL.createObjectURL(file));
+    }
   };
 
   return (
@@ -419,19 +449,27 @@ export default function Chat() {
               {chats.map((chat, index) => (
                 <li key={index} style={{ listStyle: "none" }}>
                   <ul style={{ listStyle: "none" }}>
-                    {chat.messages.map((item, msgIndex) => (
-                      <li key={msgIndex} style={{ display: "flex", justifyContent: item.sender === "support" ? "start" : "end" }}>
-                        <p
-                          style={{
-                            backgroundColor: item.sender === "support" ? "#007ace" : "#5c5f62",
-                            marginBottom: "8px",
-                            padding: "8px",
-                            borderRadius: "8px",
-                            color: "white",
-                          }}
-                        >
-                          {item.message}
-                        </p>
+                  {chat.messages.map((item, msgIndex) => (
+                      <li key={msgIndex} style={{ display: "flex", justifyContent: item.sender === "support" ? "start" : "end",flexDirection:"column", alignItems: item.sender === "support" ? "start" : "end"}}>
+                        <div style={{display:"block"}}>
+                        {item.file ? (
+                          <img src={item.file} alt="Uploaded" style={{ maxWidth: "200px", borderRadius: "5px" }} />
+                        ) : null}
+                        </div>
+                        
+                        {item.message ? (
+                          <p
+                            style={{
+                              backgroundColor: item.sender === "support" ? "#007ace" : "#5c5f62",
+                              marginBottom: "8px",
+                              padding: "8px",
+                              borderRadius: "8px",
+                              color: "white",
+                            }}
+                          >
+                            {item.message}
+                          </p>
+                        ) : null}
                       </li>
                     ))}
                   </ul>
@@ -445,8 +483,16 @@ export default function Chat() {
           <Card sectioned>
             <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
               <TextField label="Enter your message" value={message} onChange={(value) => { setMessage(value); handleTyping(); }} fullWidth />
+              {/* <input type="file" accept="image/*" onChange={handleImageChange} /> */}
+              <input type="file" accept="image/*" onChange={handleImageChange} />
               <Button primary onClick={handleSend}>Send</Button>
             </div>
+            {previewUrl && ( 
+              <div style={{ marginTop: "10px", textAlign: "center" }}>
+                <p>Image Preview:</p>
+                <img src={previewUrl} alt="Preview" style={{ maxWidth: "200px", borderRadius: "5px" }} />
+              </div>
+            )}
           </Card>
         </Layout.Section>
       </Layout>
