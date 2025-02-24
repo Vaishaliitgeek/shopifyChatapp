@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "e773c8427f6ebb27f220bb3cea55776e"
-application_url = "https://dem-white-surplus-amendments.trycloudflare.com"
+application_url = "https://calculation-majority-enclosure-supreme.trycloudflare.com"
 embedded = true
 name = "new-inboxapp"
 handle = "new-inboxapp-30"
@@ -19,9 +19,9 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://dem-white-surplus-amendments.trycloudflare.com/auth/callback",
-  "https://dem-white-surplus-amendments.trycloudflare.com/auth/shopify/callback",
-  "https://dem-white-surplus-amendments.trycloudflare.com/api/auth/callback"
+  "https://calculation-majority-enclosure-supreme.trycloudflare.com/auth/callback",
+  "https://calculation-majority-enclosure-supreme.trycloudflare.com/auth/shopify/callback",
+  "https://calculation-majority-enclosure-supreme.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]

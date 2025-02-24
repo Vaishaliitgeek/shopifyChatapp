@@ -254,7 +254,10 @@ io.on("connection", (socket) => {
       console.error("Error sending message:", error);
     }
   });
-
+  socket.on("typing", ({ userId, role }) => {
+    socket.broadcast.emit("userTyping", { userId, role });
+  });
+  
   socket.on("disconnect", () => {
     console.log("User disconnected:", socket.id);
     onlineUsers.forEach((value, key) => {

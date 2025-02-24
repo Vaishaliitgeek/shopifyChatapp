@@ -333,9 +333,8 @@ import { useEffect, useState } from "react";
 import { useLocation } from "@remix-run/react";
 import { TextField, Button, Card, Page, Layout } from "@shopify/polaris";
 import { io } from "socket.io-client";
-import { set } from "mongoose";
 
-const socket = io("https://7d4a-49-249-2-6.ngrok-free.app", {
+const socket = io("https://ace3-49-249-2-6.ngrok-free.app", {
   transports: ["websocket"],
   secure: true,
 });
@@ -343,74 +342,70 @@ const socket = io("https://7d4a-49-249-2-6.ngrok-free.app", {
 export default function Chat() {
   const [chats, setChats] = useState([]);
   const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
+  const [typingMessage, setTypingMessage] = useState("");
   const location = useLocation();
   const [userId, setUserId] = useState("");
-  const [role, setrole] = useState("support");
+  const [role, setRole] = useState("support");
 
   useEffect(() => {
     const userIds = location.state;
     if (userIds) {
       setUserId(userIds);
-    }
-    else{
+    } else {
       handleChats();
     }
   }, [location.state]);
 
   useEffect(() => {
-
     if (userId) {
       handleChats();
-
       socket.emit("joinChat", userId);
     }
+
     socket.on("newMessage", (newChat) => {
-      console.log("newChat", newChat);
       setChats(newChat);
+    });
+
+    socket.on("user2Typing", ({ userId, role }) => {
+      console.log(userId, "is typing...");
+      setTypingMessage(` is typing...`);
+      setTimeout(() => setTypingMessage(""), 2000);
     });
 
     return () => {
       socket.off("newMessage");
+      socket.off("user2Typing");
     };
-} , [userId]);
-
-const handleChats = async () => {
+  }, [userId]);
+  const handleChats = async () => {
     try {
-      let res;
-      if (userId) {
-        
-        res = await fetch("/api/chats", {
-          method: "POST",
-          body: JSON.stringify({ userId }),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-      } else {
-        res = await fetch("/api/chats");
-      }
+      let res = userId
+        ? await fetch("/api/chats", {
+            method: "POST",
+            body: JSON.stringify({ userId }),
+            headers: { "Content-Type": "application/json" },
+          })
+        : await fetch("/api/chats");
+
       const data = await res.json();
-      console.log(data,'dataaaaaaaaaaa')
       setChats(data.chats);
       if (data.userId) {
-        console.log(data,'dataaaaaaaahjkhjkjkaaa')
         setUserId(data.userId);
-        setrole(data.role);
+        setRole(data.role);
       }
     } catch (error) {
       console.error("Error fetching data:", error);
     }
   };
 
+  const handleTyping = () => {
+    socket.emit("typing", { userId, role });
+  };
+
   const handleSend = async () => {
-    setError("");
-    if (!message.trim()) {
-      setError("Please enter a message");
-    } else {
-      socket.emit("sendMessage", { userId, message, role });
-      setMessage("");
-    }
+    if (!message.trim()) return;
+    socket.emit("sendMessage", { userId, message, role });
+    setMessage("");
   };
 
   return (
@@ -419,61 +414,38 @@ const handleChats = async () => {
         <Layout.Section>
           <Card sectioned>
             <div
-              style={{
-                height: "60vh",
-                overflowY: "auto",
-                padding: "10px",
-                backgroundColor: "#ffcbb8",
-              }}
+              style={{ height: "60vh", overflowY: "auto", padding: "10px", backgroundColor: "#ffcbb8" }}
             >
-              {chats &&
-                chats.map((chat, index) => (
-                  <li key={index} style={{ listStyle: "none" }}>
-                    <ul style={{ listStyle: "none" }}>
-                      {chat.messages.map((item, msgIndex) => (
-                        <li
-                          key={msgIndex}
+              {chats.map((chat, index) => (
+                <li key={index} style={{ listStyle: "none" }}>
+                  <ul style={{ listStyle: "none" }}>
+                    {chat.messages.map((item, msgIndex) => (
+                      <li key={msgIndex} style={{ display: "flex", justifyContent: item.sender === "support" ? "start" : "end" }}>
+                        <p
                           style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent:
-                              item.sender === "support" ? "start" : "end",
+                            backgroundColor: item.sender === "support" ? "#007ace" : "#5c5f62",
+                            marginBottom: "8px",
+                            padding: "8px",
+                            borderRadius: "8px",
+                            color: "white",
                           }}
                         >
-                          <p
-                            style={{
-                              backgroundColor:
-                                item.sender === "support"
-                                  ? "#007ace"
-                                  : "#5c5f62",
-                              marginBottom: "8px",
-                              padding: "8px",
-                              borderRadius: "8px",
-                              color: "white",
-                            }}
-                          >
-                            {item.message}
-                          </p>
-                        </li>
-                      ))}
-                    </ul>
-                  </li>
-                ))}
+                          {item.message}
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              ))}
             </div>
+            {typingMessage && <p style={{ padding: "10px", fontStyle: "italic" }}>{typingMessage}</p>}
           </Card>
         </Layout.Section>
         <Layout.Section>
           <Card sectioned>
             <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-              <TextField
-                label="Enter your message"
-                value={message}
-                onChange={(value) => setMessage(value)}
-                fullWidth
-              />
-              <Button primary onClick={handleSend}>
-                Send
-              </Button>
+              <TextField label="Enter your message" value={message} onChange={(value) => { setMessage(value); handleTyping(); }} fullWidth />
+              <Button primary onClick={handleSend}>Send</Button>
             </div>
           </Card>
         </Layout.Section>
