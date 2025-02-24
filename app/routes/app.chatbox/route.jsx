@@ -335,7 +335,7 @@ import { TextField, Button, Card, Page, Layout } from "@shopify/polaris";
 import { io } from "socket.io-client";
 import { set } from "mongoose";
 
-const socket = io("https://f4af-49-249-2-6.ngrok-free.app", {
+const socket = io("https://7d4a-49-249-2-6.ngrok-free.app", {
   transports: ["websocket"],
   secure: true,
 });

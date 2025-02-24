@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "ff60387e845f105323d918fe8be3c606"
-application_url = "https://colours-hebrew-utilize-gibraltar.trycloudflare.com"
+application_url = "https://more-music-donna-senior.trycloudflare.com"
 embedded = true
 name = "new-inboxapp"
 handle = "new-inboxapp"
@@ -27,9 +27,9 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://colours-hebrew-utilize-gibraltar.trycloudflare.com/auth/callback",
-  "https://colours-hebrew-utilize-gibraltar.trycloudflare.com/auth/shopify/callback",
-  "https://colours-hebrew-utilize-gibraltar.trycloudflare.com/api/auth/callback"
+  "https://more-music-donna-senior.trycloudflare.com/auth/callback",
+  "https://more-music-donna-senior.trycloudflare.com/auth/shopify/callback",
+  "https://more-music-donna-senior.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]

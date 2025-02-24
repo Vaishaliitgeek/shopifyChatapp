@@ -24,6 +24,8 @@ export default function App() {
         </Link>
         <Link to="/app/customerlist">CustomerList</Link>
         <Link to="/app/chatbox">Chat page</Link>
+        <Link to="/app/navbar">Navbar</Link>
+
       </NavMenu>
       <Outlet />
     </AppProvider>
