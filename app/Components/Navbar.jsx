@@ -19,6 +19,9 @@ const Navbar = () => {
         <li>
           <Link to="/app/dbProduct">Your Product</Link>
         </li>
+        <li>
+          <Link to="/app/order">Orders</Link>
+        </li>
       </ul>
     </nav>
   );

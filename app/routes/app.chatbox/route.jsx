@@ -328,90 +328,110 @@
 // }
 
 
-
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useLocation } from "@remix-run/react";
 import { TextField, Button, Card, Page, Layout } from "@shopify/polaris";
 import { io } from "socket.io-client";
+import { set } from "mongoose";
 
-const socket = io("https://ace3-49-249-2-6.ngrok-free.app", {
+// const socket = io("http://localhost:3000", {
+//   transports: ["websocket"],
+//   secure: true,
+// });
+
+const socket = io("https://84df-49-249-2-6.ngrok-free.app", {
   transports: ["websocket"],
   secure: true,
 });
-
 export default function Chat() {
+  const location = useLocation();
+  const fileInputRef = useRef(null);
   const [chats, setChats] = useState([]);
   const [message, setMessage] = useState("");
   const [typingMessage, setTypingMessage] = useState("");
-  const location = useLocation();
   const [userId, setUserId] = useState("");
   const [role, setRole] = useState("support");
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
+  const [editContent, setEditContent] = useState({ chatId: "", messageId: "", newMessage: "" });
+  const [userStatus, setUserStatus] = useState({});
+  const [activeUserId, setactiveUserId] = useState("");
+const[online,setOnline]=useState(false)
 
   useEffect(() => {
     const userIds = location.state;
-    if (userIds) {
-      setUserId(userIds);
-    } else {
-      handleChats();
-    }
+    if (userIds) setUserId(userIds);
+    else handleChats();;
   }, [location.state]);
 
   useEffect(() => {
     if (userId) {
       handleChats();
-      socket.emit("joinChat", userId);
+      socket.emit("joinChat", {userId,activeUserId});
     }
-
     socket.on("newMessage", (newChat) => {
       setChats(newChat);
     });
-
-    socket.on("user2Typing", ({ userId, role }) => {
-      console.log(userId, "is typing...");
-      setTypingMessage(` is typing...`);
+    socket.on("user2Typing", () => {
+      setTypingMessage("User is typing...");
       setTimeout(() => setTypingMessage(""), 2000);
+
+    });
+    socket.on("supportOnline", ({ activeUserId, name , status }) => {
+      console.log("supportOnline", activeUserId, name, status);
+      setOnline(true)
+    });
+
+    socket.on("supportOffline", ({ activeUserId, name , status }) => {
+      console.log("supportOffline", activeUserId, name, status);
+      setOnline(false)
+    });
+
+    socket.on("chagedChat", (userId) => {
+      handleChats();      
     });
 
     return () => {
       socket.off("newMessage");
       socket.off("user2Typing");
+      socket.off("chagedChat");
+      socket.off("supportOnline");
+      socket.off("supportOffline");
     };
   }, [userId]);
+
   const handleChats = async () => {
     try {
       let res = userId
         ? await fetch("/api/chats", {
-            method: "POST",
-            body: JSON.stringify({ userId }),
-            headers: { "Content-Type": "application/json" },
-          })
+          method: "POST",
+          body: JSON.stringify({ userId }),
+          headers: { "Content-Type": "application/json" },
+        })
         : await fetch("/api/chats");
 
       const data = await res.json();
       setChats(data.chats);
       if (data.userId) {
+        setactiveUserId(data.userId);
         setUserId(data.userId);
         setRole(data.role);
       }
     } catch (error) {
-      console.error("Error fetching data:", error);
+      console.error("Error fetching chats:", error);
     }
   };
 
-  const handleTyping = () => {
-    socket.emit("typing", { userId, role });
-  };
+  const handleTyping = () => socket.emit("typing", { userId, role });
 
   const handleSend = async () => {
-    if (!message.trim() && !selectedFile) return;  
-//
+    if (!message.trim() && !selectedFile) return;
+
     let fileUrl = "";
     if (selectedFile) {
       const formData = new FormData();
       formData.append("file", selectedFile);
-      formData.append("upload_preset", "chatImage"); 
+      formData.append("upload_preset", "chatImage");
 
       const response = await fetch("https://api.cloudinary.com/v1_1/dxhnwndac/image/upload", {
         method: "POST",
@@ -419,7 +439,7 @@ export default function Chat() {
       });
 
       const data = await response.json();
-      fileUrl = data.secure_url; 
+      fileUrl = data.secure_url;
     }
 
     socket.emit("sendMessage", { userId, message, file: fileUrl, role });
@@ -427,53 +447,104 @@ export default function Chat() {
     setMessage("");
     setSelectedFile(null);
     setPreviewUrl(null);
-
-  };
-
-  const handleImageChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      setSelectedFile(file);
-      setPreviewUrl(URL.createObjectURL(file));
+    if (fileInputRef.current) { 
+      fileInputRef.current.value = "";
     }
   };
 
+
+
+  const handleDeleteMessage = async (chatId, messageId) => {
+
+    try {
+      const res = await fetch(`/api/edit-message/${chatId}/${messageId}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (data.success) {
+        socket.emit("chatupdate", userId );
+      } else {
+        console.error("Error deleting message:", data.message);
+      }
+    } catch (error) {
+      console.error("Error deleting message:", error);
+    }
+  };
+
+  const handleEdit = async () => {
+
+    try {
+      const res = await fetch(`/api/edit-message/${editContent.chatId}/${editContent.messageId}`, {
+        method: "PUT",
+        body: JSON.stringify({ newMessage: editContent.newMessage }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        setEditContent({
+          chatId: "",
+          messageId: "",
+          newMessage: "",
+          file: "",
+        });
+        socket.emit("chatupdate", userId );
+      } else {
+        console.error("Error updating message:", data.message);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
+
+  // status show krne k liye
+  // useEffect(() => {
+  //   socket.on("userStatus", ({ userId, status }) => {
+  //     setUserStatus((prev) => ({ ...prev, [userId]: status }));
+  //   });
+  
+  //   return () => {
+  //     socket.off("userStatus");
+  //   };
+  // }, []);
+
   return (
-    <Page title="Chat with Customer">
+    <Page title="Chat with Support">
+ {online ? <p style={{color:"green"}}>Onlinee</p>:<p style={{color:"red"}}>Offline</p>}
+
       <Layout>
         <Layout.Section>
           <Card sectioned>
-            <div
-              style={{ height: "60vh", overflowY: "auto", padding: "10px", backgroundColor: "#ffcbb8" }}
-            >
-              {chats.map((chat, index) => (
-                <li key={index} style={{ listStyle: "none" }}>
-                  <ul style={{ listStyle: "none" }}>
-                  {chat.messages.map((item, msgIndex) => (
-                      <li key={msgIndex} style={{ display: "flex", justifyContent: item.sender === "support" ? "start" : "end",flexDirection:"column", alignItems: item.sender === "support" ? "start" : "end"}}>
-                        <div style={{display:"block"}}>
-                        {item.file ? (
-                          <img src={item.file} alt="Uploaded" style={{ maxWidth: "200px", borderRadius: "5px" }} />
-                        ) : null}
-                        </div>
-                        
-                        {item.message ? (
-                          <p
-                            style={{
-                              backgroundColor: item.sender === "support" ? "#007ace" : "#5c5f62",
-                              marginBottom: "8px",
-                              padding: "8px",
-                              borderRadius: "8px",
-                              color: "white",
-                            }}
+            <div style={{ height: "60vh", overflowY: "auto", padding: "10px", backgroundColor: "#f4f4f4", borderRadius: "8px" }}>
+              {chats.map((chat) => (
+                <ul key={chat._id} style={{ listStyle: "none" }}>
+                  {chat.messages.map((item) => (
+                    <li key={item._id} style={{ display: "flex", flexDirection: "column", alignItems: item.sender === "support" ? "start" : "end", marginBottom: "10px" }}>
+                      {item.file && <img src={item.file} alt="Uploaded" style={{ maxWidth: "200px", borderRadius: "5px", marginBottom: "5px" }} />}
+                      {item.message && <p style={{ backgroundColor: item.sender === "support" ? "#007ace" : "#5c5f62", color: "white", padding: "10px", borderRadius: "8px", maxWidth: "60%", wordWrap: "break-word" }}>{item.message}</p>}
+                      {role === "customer" && item.sender === "customer" && (
+                        <div style={{ marginTop: "5px" }}>
+                          <Button onClick={() => handleDeleteMessage(chat._id, item._id)}>🗑️ Delete</Button>
+                          {item.message && <Button
+                            onClick={() =>
+                              setEditContent({
+                                ...editContent,
+                                chatId: chat._id,
+                                messageId: item._id,
+                                newMessage: item.message,
+                              })
+                            }
                           >
-                            {item.message}
-                          </p>
-                        ) : null}
-                      </li>
-                    ))}
-                  </ul>
-                </li>
+                            Edit
+                          </Button>}
+                        </div>
+                      )}
+                    </li>
+                  ))}
+                </ul>
               ))}
             </div>
             {typingMessage && <p style={{ padding: "10px", fontStyle: "italic" }}>{typingMessage}</p>}
@@ -482,17 +553,19 @@ export default function Chat() {
         <Layout.Section>
           <Card sectioned>
             <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-              <TextField label="Enter your message" value={message} onChange={(value) => { setMessage(value); handleTyping(); }} fullWidth />
-              {/* <input type="file" accept="image/*" onChange={handleImageChange} /> */}
-              <input type="file" accept="image/*" onChange={handleImageChange} />
-              <Button primary onClick={handleSend}>Send</Button>
+              {editContent.chatId ? (
+                <>
+                  <TextField label="Edit your message" value={editContent.newMessage} onChange={(value) => setEditContent({ ...editContent, newMessage: value })} fullWidth />
+                  <Button primary onClick={handleEdit}>Update</Button>
+                </>
+              ) : (
+                <>
+                  <TextField label="Enter your message" value={message} onChange={(value) => { setMessage(value); handleTyping(); }} fullWidth />
+                  <input type="file" accept="image/*" onChange={(e) => setSelectedFile(e.target.files[0])} ref={fileInputRef} />
+                  <Button primary onClick={handleSend}>Send</Button>
+                </>
+              )}
             </div>
-            {previewUrl && ( 
-              <div style={{ marginTop: "10px", textAlign: "center" }}>
-                <p>Image Preview:</p>
-                <img src={previewUrl} alt="Preview" style={{ maxWidth: "200px", borderRadius: "5px" }} />
-              </div>
-            )}
           </Card>
         </Layout.Section>
       </Layout>

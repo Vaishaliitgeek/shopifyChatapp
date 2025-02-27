@@ -3,7 +3,8 @@ import { Product } from "../../models/product.model";
 
 export async function loader({ request }) {
   try {
-    const { admin } = await authenticate.admin(request);
+    const { admin ,session} = await authenticate.admin(request);
+    console.log("Session scope",session.scope);
     console.log("Admin Authenticated:", admin);
 
     // Fetch products from Shopify

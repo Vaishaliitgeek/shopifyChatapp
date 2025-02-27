@@ -265,19 +265,19 @@ io.on("connection", (socket) => {
   
       if (chat) {
         chat.messages.push({
-          sender: "support",
-          message: message || "", // If there's no message, store an empty string
-          file: file || "", // Store file URL if provided
+          sender: user.role,
+          message: message || "", 
+          file: file || "", 
         });
       } else {
         chat = new Chat({
           customerId: userId,
-          messages: [{ sender: "support", message: message || "", file: file || "" }],
+          messages: [{ sender: user.role, message: message || "", file: file || "" }],
         });
       }
   
       await chat.save();
-      io.emit("newMessage", [chat]); // Send updated chat to frontend
+      io.emit("newMessage", [chat]); 
   
       console.log(`New message from support to ${userId}: ${message || "File uploaded"}`);
     } catch (error) {

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Page, DataTable } from '@shopify/polaris';
+import { Card, Page, DataTable,Button } from '@shopify/polaris';
 import image from './image/one.jpg';
 
 const ProductsList = () => {
@@ -58,17 +58,20 @@ if(!error){
       width="50" 
       height="50"
     />,
-    product.title,
+    product.title.slice(0, 20) ,
     product.vendor,
     product.status,
-    product.handle, 
+    product.handle.slice(0,30), 
   ]);
 }
  
 
   return (
     <>
-    <button onClick={addProduct}>Add Product</button>
+    <p style={{margin:"1rem"}}>
+    <Button  onClick={addProduct}>Add Product</Button>
+
+    </p>
  
   {error ? <div>{error}</div> : <Page title="Products">
       <Card>

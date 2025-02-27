@@ -10,6 +10,8 @@ import dotenv from "dotenv";
 dotenv.config();
 import { restResources } from "@shopify/shopify-api/rest/admin/2025-01"; 
 
+
+
 const shopify = shopifyApp({
   apiKey: process.env.SHOPIFY_API_KEY,
   apiSecretKey: process.env.SHOPIFY_API_SECRET || "",

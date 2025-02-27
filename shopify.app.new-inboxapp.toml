@@ -1,10 +1,10 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
-client_id = "e773c8427f6ebb27f220bb3cea55776e"
-application_url = "https://inclusive-tap-okay-electrical.trycloudflare.com"
+client_id = "74470cff8f751a346e4fa1cae9d0b807"
+application_url = "https://force-map-comm-polymer.trycloudflare.com"
 embedded = true
 name = "new-inboxapp"
-handle = "new-inboxapp-30"
+handle = "new-inboxapp-54"
 
 [build]
 include_config_on_deploy = true
@@ -15,13 +15,13 @@ api_version = "2025-01"
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "write_products"
+scopes = "read_customers,read_orders,read_product_listings,write_customers,write_order_edits,write_orders,write_products"
 
 [auth]
 redirect_urls = [
-  "https://inclusive-tap-okay-electrical.trycloudflare.com/auth/callback",
-  "https://inclusive-tap-okay-electrical.trycloudflare.com/auth/shopify/callback",
-  "https://inclusive-tap-okay-electrical.trycloudflare.com/api/auth/callback"
+  "https://force-map-comm-polymer.trycloudflare.com/auth/callback",
+  "https://force-map-comm-polymer.trycloudflare.com/auth/shopify/callback",
+  "https://force-map-comm-polymer.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]
