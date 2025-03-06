@@ -1,6 +1,8 @@
-import { Chat } from "../../models/chats.model";
-import { User } from "../../models/user.model";
+// import { Chat } from "../../models/chats.model";
+// import { User } from "../../models/user.model";
 import { authenticate } from "../../shopify.server";
+import { Chat } from "../../server/models/chats.model";
+import { User } from "../../server/models/user.model";
 
 export const loader = async ({ request }) => {
     const { session } = await authenticate.admin(request);

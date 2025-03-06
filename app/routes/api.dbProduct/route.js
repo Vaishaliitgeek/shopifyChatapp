@@ -1,4 +1,5 @@
-import { Product } from "../../models/product.model"
+// import { Product } from "../../models/product.model"
+import {Product} from "../../server/models/product.model.js"
 
 export const loader=async({request})=>{
   try{

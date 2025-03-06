@@ -72,7 +72,7 @@ const navigate =useNavigate();
 
       <Card sectioned>
         <p style={{ display: "flex", justifyContent: "space-between" }}>
-          <span><Text variation="strong">Order ID:</Text> {order.id}</span>
+          <span><Text variation="bold">Order ID:</Text> {order.id}</span>
           <Button  onClick={()=>handleNaviate(orderId)} >Add Product</Button>
         </p>
         <p>
@@ -104,7 +104,7 @@ const navigate =useNavigate();
                   )}
                   <div>
                     <h3>
-                      <Text variation="strong">{title}</Text>
+                    <Text variant="headingMd">{title}</Text>
                     </h3>
                     <p>
                       <Text variation="subdued">Variant:</Text> {variant?.title}

@@ -1,5 +1,7 @@
-import { Chat } from "../../models/chats.model";
-import { User } from "../../models/user.model";
+// import { Chat } from "../../models/chats.model";
+// import { User } from "../../models/user.model";
+import { Chat } from "../../server/models/chats.model";
+import { User } from "../../server/models/user.model";
 
 export const action = async ({ request, params }) => {
   if (request.method !== "DELETE") {

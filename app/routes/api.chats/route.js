@@ -69,8 +69,10 @@
 //   }
 // };
 
-import { Chat } from "../../models/chats.model";
-import { User } from "../../models/user.model";
+// import { Chat } from "../../models/chats.model";
+import {Chat} from "../../server/models/chats.model.js"
+import {User} from "../../server/models/user.model.js"
+// import { User } from "../../models/user.model";
 import { authenticate } from "../../shopify.server";
 
 export const loader = async ({ request }) => {

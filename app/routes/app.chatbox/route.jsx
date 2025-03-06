@@ -339,7 +339,7 @@ import { set } from "mongoose";
 //   secure: true,
 // });
 
-const socket = io("https://84df-49-249-2-6.ngrok-free.app", {
+const socket = io("https://6929-49-249-2-6.ngrok-free.app", {
   transports: ["websocket"],
   secure: true,
 });
@@ -350,15 +350,55 @@ export default function Chat() {
   const [message, setMessage] = useState("");
   const [typingMessage, setTypingMessage] = useState("");
   const [userId, setUserId] = useState("");
-  const [role, setRole] = useState("support");
+  const [role, setRole] = useState("customer");
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [editContent, setEditContent] = useState({ chatId: "", messageId: "", newMessage: "" });
   const [userStatus, setUserStatus] = useState({});
   const [activeUserId, setactiveUserId] = useState("");
 const[online,setOnline]=useState(false)
+// useEffect(() => {
+//   const callback = async (metrics) => {
+//     console.log("Web Vitals Event Triggered:", metrics); 
+
+//     const monitorUrl = 'https://4ca5-49-249-2-6.ngrok-free.app/api/shopLcp?shop=checkout-thank-you.myshopify.com';
+//     const data = JSON.stringify(metrics);
+    
+//     navigator.sendBeacon(monitorUrl, data);
+//   };
+
+//   if (window?.shopify?.webVitals) {
+//     shopify.webVitals.onReport(callback);
+//   } else {
+//     console.warn("Shopify Web Vitals API not available.");
+//   }
+// }, []);
 
   useEffect(() => {
+    // Define the callback function
+// const callback = async (metrics) => {
+//   const monitorUrl = 'https://4ca5-49-249-2-6.ngrok-free.app/api/shopLcp?shop=checkout-thank-you.myshopify.com';
+//   const data = JSON.stringify(metrics);
+//   console.log(data,"data")
+
+//   navigator.sendBeacon(monitorUrl, data);
+// };
+
+// // Register the callback
+// shopify.webVitals.onReport(callback);
+
+    console.log("rfrfrrfgrgrgg")
+    // const callback = async (metrics) => {
+    //   console.log("Running")
+    //   const monitorUrl = 'https://7cef-49-249-2-6.ngrok-free.app/api/shopLcp?shop=checkout-thank-you.myshopify.comp';
+    //   // const data = JSON.stringify(metrics);
+    // console.log("data",metrics)
+    //   navigator.sendBeacon(monitorUrl, data);
+    // };
+    
+    // // Register the callback`
+    // console.log("run2")
+    // shopify.webVitals.onReport(callback);
     const userIds = location.state;
     if (userIds) setUserId(userIds);
     else handleChats();;
@@ -373,7 +413,7 @@ const[online,setOnline]=useState(false)
       setChats(newChat);
     });
     socket.on("user2Typing", () => {
-      setTypingMessage("User is typing...");
+      setTypingMessage("Support is typing...");
       setTimeout(() => setTypingMessage(""), 2000);
 
     });

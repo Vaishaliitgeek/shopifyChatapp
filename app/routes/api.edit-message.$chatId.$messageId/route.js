@@ -1,6 +1,7 @@
 
 
-import { Chat } from "../../models/chats.model";
+// import { Chat } from "../../models/chats.model";
+import { Chat } from "../../server/models/chats.model";
 
 export const action = async ({ request, params }) => {
   const method = request.method;

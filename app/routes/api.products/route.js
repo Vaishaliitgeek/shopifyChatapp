@@ -1,5 +1,6 @@
 import { authenticate } from "../../shopify.server";
-import { Product } from "../../models/product.model";
+// import { Product } from "../../models/product.model";
+import { Product } from "../../server/models/product.model";
 
 export async function loader({ request }) {
   try {

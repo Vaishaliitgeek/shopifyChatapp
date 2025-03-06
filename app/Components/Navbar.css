@@ -47,3 +47,51 @@
 body {
   padding-top: 60px;
 }
+
+.dropdown {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.nav-dropdown {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  color: white;
+  font-size: 1rem;
+  font-weight: bold;
+  padding: 8px 12px;
+  border-radius: 5px;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  transition: all 0.3s ease;
+}
+
+.nav-dropdown:hover,
+.nav-dropdown:focus {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: white;
+}
+
+.nav-dropdown::after {
+  content: "▼";
+  font-size: 12px;
+  position: absolute;
+  right: 10px;
+  color: white;
+  pointer-events: none;
+}
+
+.nav-dropdown option {
+  background: #17181a;
+  color: white;
+  padding: 10px;
+}
+
+@media (max-width: 768px) {
+  .nav-dropdown {
+    font-size: 0.9rem;
+    padding: 6px 10px;
+  }
+}

@@ -1,10 +1,10 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
-client_id = "74470cff8f751a346e4fa1cae9d0b807"
-application_url = "https://force-map-comm-polymer.trycloudflare.com"
+client_id = "3c65356a899cb7b59a68035ed2fca7e1"
+application_url = "https://lodge-bad-truth-father.trycloudflare.com"
 embedded = true
 name = "new-inboxapp"
-handle = "new-inboxapp-54"
+handle = "new-inboxapp-61"
 
 [build]
 include_config_on_deploy = true
@@ -15,13 +15,13 @@ api_version = "2025-01"
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "read_customers,read_orders,read_product_listings,write_customers,write_order_edits,write_orders,write_products"
+scopes = "read_customers,read_orders,read_product_listings,write_customers,write_discounts,write_gift_cards,write_order_edits,write_orders,write_products"
 
 [auth]
 redirect_urls = [
-  "https://force-map-comm-polymer.trycloudflare.com/auth/callback",
-  "https://force-map-comm-polymer.trycloudflare.com/auth/shopify/callback",
-  "https://force-map-comm-polymer.trycloudflare.com/api/auth/callback"
+  "https://lodge-bad-truth-father.trycloudflare.com/auth/callback",
+  "https://lodge-bad-truth-father.trycloudflare.com/auth/shopify/callback",
+  "https://lodge-bad-truth-father.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]

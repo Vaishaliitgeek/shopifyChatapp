@@ -1,6 +1,8 @@
 import { authenticate } from "../../shopify.server";
-import { User } from "../../models/user.model";
-import { Chat } from "../../models/chats.model";
+// import { User } from "../../models/user.model";
+// import { Chat } from "../../models/chats.model";
+import { User } from "../../server/models/user.model";
+import { Chat } from "../../server/models/chats.model";
 
 export const loader = async ({ request }) => {
   try {
@@ -46,7 +48,7 @@ export const action = async ({ request }) => {
       const { admin, session } = await authenticate.admin(request);
       const shop = await admin.rest.resources.Shop.all({ session });
       const shopData = shop.data[0];
-
+      console.log("shopData--", shopData);
       let user = await User.findOne({ email: session.shop });
 
       const existingCustomer = await User.findOne({ customer_email: customerEmail });
