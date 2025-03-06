@@ -68,7 +68,7 @@ const Route = () => {
     // orderdetail?orderId=${orderId}
 
     try {
-      const res = await fetch(`/api/BuyXGetY?type=BuyXGetY`, {
+      const res = await fetch(`/api/Alldiscounts?type=BuyXGetY`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ variables }),

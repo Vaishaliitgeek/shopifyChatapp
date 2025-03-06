@@ -59,7 +59,7 @@ const DiscountCodeForm = () => {
 
 
     try {
-      const res = await fetch(`/api/BuyXGetY?type=discount`, {
+      const res = await fetch(`/api/Alldiscounts?type=discount`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ variables }),

@@ -20,7 +20,7 @@ const ApplyDiscount = () => {
     setLoading(true);
 
     try {
-      const res = await fetch("/api/BuyXGetY?type=LineItemDiscount", {
+      const res = await fetch("/api/Alldiscounts?type=LineItemDiscount", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ orderId, description, amount, quantity }),

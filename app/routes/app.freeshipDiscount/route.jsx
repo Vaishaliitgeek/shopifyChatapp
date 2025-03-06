@@ -55,7 +55,7 @@ const Route = () => {
     };
 // /api/BuyXGetY?type=BuyXGetY`
     try {
-      const res = await fetch(`/api/BuyXGetY?type=freeShipping`, {
+      const res = await fetch(`/api/Alldiscounts?type=freeShipping`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ variables }),
