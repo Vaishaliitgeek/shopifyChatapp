@@ -5,12 +5,12 @@ import './Navbar.css';
 const Navbar = () => {
   const navigate = useNavigate();
 
-  const handleDiscountChange = (event) => {
-    const selectedPage = event.target.value;
-    if (selectedPage) {
-      navigate(selectedPage);
-    }
-  };
+  // const handleDiscountChange = (event) => {
+  //   const selectedPage = event.target.value;
+  //   if (selectedPage) {
+  //     navigate(selectedPage);
+  //   }
+  // };
 
   return (
     <nav className="navbar">
@@ -31,7 +31,8 @@ const Navbar = () => {
         <li>
           <Link to="/app/giftCard">Gift Card</Link>
         </li>
-        <li className="dropdown">
+        <li> <Link to="/app/discountmain">Discount</Link></li>
+        {/* <li className="dropdown">
           <select className="nav-dropdown" onChange={handleDiscountChange} defaultValue="">
             <option value="" disabled>Discount</option>
             <option value="/app/discount">Amount OFF Order</option>
@@ -40,7 +41,7 @@ const Navbar = () => {
             <option value="/app/freeshipDiscount">Free Shipping</option>
 
           </select>
-        </li>
+        </li> */}
         {/* <li>
           <Link to="/app/flow">Flow</Link>
         </li> */}

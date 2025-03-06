@@ -11,7 +11,7 @@ const ApplyDiscount = () => {
   const [loading, setLoading] = useState(false);
 
   const applyDiscount = async () => {
-    if (!orderId || !lineItemId || !description || !amount || !quantity) {
+    if (!orderId || !description || !amount || !quantity) {
       setResponseMessage(" Please fill all fields.");
       return;
     }

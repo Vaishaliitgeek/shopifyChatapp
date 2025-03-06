@@ -52,7 +52,7 @@ export const createAmountoffDiscount=async(variables,admin)=>{
       console.log("Discount creation response: shippppingggkjjjjjjjjjjjj", data);
 
       const userErrors = data?.errors || data?.data?.discountCodeBasicCreate?.userErrors || [];
-
+ampountOff
 
       if (userErrors.length > 0) {
         console.error("Shopify discount creation error:", userErrors);
