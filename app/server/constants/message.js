@@ -4,6 +4,7 @@ export const successMessage = {
   OPERATION_SUCCESS: "Operation completed successfully",
 };
 export const errorMessage = {
+  DISCOUNT_FAILED: "Discount creation Failed",
   INVALID_REQUEST: "Invalid request",
   UNAUTHORIZED: "Unauthorized access",
   FORBIDDEN: "You do not have permission to perform this action",

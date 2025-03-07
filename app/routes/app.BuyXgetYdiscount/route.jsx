@@ -102,6 +102,7 @@ const Route = () => {
                 value={formData.title}
                 onChange={(value) => handleChange(value, "title")}
                 requiredIndicator
+                disabled={loading}
               />
               <TextField
                 label="Starts At"
@@ -109,19 +110,22 @@ const Route = () => {
                 value={formData.startsAt}
                 onChange={(value) => handleChange(value, "startsAt")}
                 requiredIndicator
-                error={errors.startsAt} // Show error if empty
+                error={errors.startsAt} 
+                disabled={loading}
               />
               <TextField
                 label="Ends At"
                 type="datetime-local"
                 value={formData.endsAt}
                 onChange={(value) => handleChange(value, "endsAt")}
+                disabled={loading}
               />
               <TextField
                 label="Buy Product ID"
                 value={formData.buyProductId}
                 onChange={(value) => handleChange(value, "buyProductId")}
                 requiredIndicator
+                disabled={loading}
               />
               <TextField
                 label="Buy Quantity"
@@ -129,12 +133,14 @@ const Route = () => {
                 value={formData.buyQuantity}
                 onChange={(value) => handleChange(value, "buyQuantity")}
                 requiredIndicator
+                disabled={loading}
               />
               <TextField
                 label="Get Product ID"
                 value={formData.getProductId}
                 onChange={(value) => handleChange(value, "getProductId")}
                 requiredIndicator
+                disabled={loading}
               />
               <TextField
                 label="Get Quantity"
@@ -142,6 +148,7 @@ const Route = () => {
                 value={formData.getQuantity}
                 onChange={(value) => handleChange(value, "getQuantity")}
                 requiredIndicator
+                disabled={loading}
               />
               <Button primary submit loading={loading}>
                 {loading ? "Processing..." : "Create Discount"}

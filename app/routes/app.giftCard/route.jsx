@@ -63,6 +63,7 @@ const GiftCard = () => {
               value={formData.amount}
               onChange={(value) => handleChange(value, "amount")}
               requiredIndicator
+              disabled={loading}
             />
 
             <TextField
@@ -71,6 +72,7 @@ const GiftCard = () => {
               value={formData.customerId}
               onChange={(value) => handleChange(value, "customerId")}
               requiredIndicator
+              disabled={loading}
             />
 
             <TextField
@@ -79,6 +81,7 @@ const GiftCard = () => {
               value={formData.recepientId}
               onChange={(value) => handleChange(value, "recepientId")}
               requiredIndicator
+              disabled={loading}
             />
 
             <TextField
@@ -87,6 +90,7 @@ const GiftCard = () => {
               value={formData.message}
               onChange={(value) => handleChange(value, "message")}
               requiredIndicator
+              disabled={loading}
             />
 
             <TextField
@@ -95,6 +99,7 @@ const GiftCard = () => {
               value={formData.preferredName}
               onChange={(value) => handleChange(value, "preferredName")}
               requiredIndicator
+              disabled={loading}
             />
 
             <TextField
@@ -103,6 +108,7 @@ const GiftCard = () => {
               value={formData.sendNotificationAt}
               onChange={(value) => handleChange(value, "sendNotificationAt")}
               requiredIndicator
+              disabled={loading}
             />
   
             <Button primary submit loading={loading}>

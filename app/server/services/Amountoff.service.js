@@ -1,4 +1,5 @@
-// import { authenticate } from "../../shopify.server"
+import { statusCode } from "../constants/constant";
+import { successMessage,errorMessage } from "../constants/message";
 export const createAmountoffDiscount=async(variables,admin)=>{
  try {
       console.log("variables",variables);
@@ -38,49 +39,49 @@ export const createAmountoffDiscount=async(variables,admin)=>{
 
     
 
-      // if (data.data?.discountCodeBasicCreate?.userErrors?.length > 0) {
-      //   console.error("Shopify discount code creation error:", data.data.discountCodeBasicCreate.userErrors);
-      //   return new Response(
-      //     JSON.stringify({
-      //       error: "Failed to create discount code",
-      //       details: data.data.discountCodeBasicCreate.userErrors
-      //     }),
-      //     { status: 400, headers: { "Content-Type": "application/json" } }
-      //   );
-      // }
+    
       const data = await response.json();
-      console.log("Discount creation response: shippppingggkjjjjjjjjjjjj", data);
+      console.log("Discount creation response", data);
 
       const userErrors = data?.errors || data?.data?.discountCodeBasicCreate?.userErrors || [];
-ampountOff
+// ampountOff
 
       if (userErrors.length > 0) {
         console.error("Shopify discount creation error:", userErrors);
-        return new Response(
-          JSON.stringify({
-            error: "Failed to create discount",
-            shopifyErrors: userErrors.map(err => ({
-              field: err.field,
-              code: err.code,
-              message: err.message
-            })),
-          }),
-          { status: 400, headers: { "Content-Type": "application/json" } }
-        );
+        // return new Response(
+        //   JSON.stringify({
+        //     error: errorMessage.DISCOUNT_FAILED,
+        //     shopifyErrors: userErrors.map(err => ({
+        //       field: err.field,
+        //       code: err.code,
+        //       message: err.message
+        //     })),
+        //   }),
+        //   { status: statusCode.BAD_REQUEST, headers: { "Content-Type": "application/json" } }
+        // );
+        return {
+          status: false,
+          message: errorMessage.DISCOUNT_FAILED,
+          errors: userErrors.map(err => ({
+            field: err.field,
+            message: err.message
+          })),
+        };
       }
-      return new Response(
-        JSON.stringify({
-          message: "Discount code created successfully",
+      return {
+        status: true,
+        message: successMessage.DISCOUNT_CREATED,
+        data: {
           discountCode: data.data.discountCodeBasicCreate.codeDiscountNode
-        }),
-        { status: 200, headers: { "Content-Type": "application/json" } }
-      );
+        }
+      };
     } catch (error) {
       console.error("Error creating discount code:", error);
-      return new Response(
-        JSON.stringify({ error: "Failed to create discount code"}),
-        { status: 500, headers: { "Content-Type": "application/json" } }
-      );
+      return {
+        status: false,
+        message: "Internal Server Error",
+        error: error.message,
+      };
     }
   };
 

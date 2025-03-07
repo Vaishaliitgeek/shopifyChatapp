@@ -6,7 +6,7 @@ export const action = async ({ request }) => {
       const { input } = await request.json();
       console.log("Creating gift card...", input);
 
-      const { admin } = await authenticate.admin(request); 
+      const { admin } = await authenticate.admin(request);
       const response = await admin.graphql(
         `#graphql
         mutation CreateGiftCard($input: GiftCardCreateInput!) {

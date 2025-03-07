@@ -53,7 +53,6 @@ const Route = () => {
         ...(formData.endsAt.trim() !== "" && { endsAt: formData.endsAt }),
       },
     };
-// /api/BuyXGetY?type=BuyXGetY`
     try {
       const res = await fetch(`/api/Alldiscounts?type=freeShipping`, {
         method: "POST",
@@ -68,7 +67,8 @@ const Route = () => {
       if (data.status && !data.error) {
         setToastMessage("Discount Code Created Successfully!");
       } else {
-        setToastMessage(data.message || "Failed to create discount");
+        setToastMessage(data?.result[0]?.message|| "Failed to create discount");
+
       }
       
     } catch (error) {
@@ -90,6 +90,7 @@ const Route = () => {
                 value={formData.title}
                 onChange={(value) => handleChange(value, "title")}
                 requiredIndicator
+                disabled={loading}
               />
               <TextField
                 label="Discount Code"
@@ -97,6 +98,7 @@ const Route = () => {
                 onChange={(value) => handleChange(value, "code")}
                 requiredIndicator
                 error={errors.code} 
+                disabled={loading}
               />
               <TextField
                 label="Starts At"
@@ -105,12 +107,14 @@ const Route = () => {
                 onChange={(value) => handleChange(value, "startsAt")}
                 requiredIndicator
                 error={errors.startsAt} 
+                disabled={loading}
               />
               <TextField
                 label="Ends At"
                 type="datetime-local"
                 value={formData.endsAt}
                 onChange={(value) => handleChange(value, "endsAt")}
+                disabled={loading}
               />
               {/* <TextField
                 label="Minimum Subtotal ($)"

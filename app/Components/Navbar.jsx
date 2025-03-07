@@ -5,33 +5,30 @@ import './Navbar.css';
 const Navbar = () => {
   const navigate = useNavigate();
 
-  // const handleDiscountChange = (event) => {
-  //   const selectedPage = event.target.value;
-  //   if (selectedPage) {
-  //     navigate(selectedPage);
-  //   }
-  // };
+  
 
   return (
     <nav className="navbar">
       <div className="logo">My Shopify App</div>
       <ul className="nav-links">
-        <li>
-          <Link to="/app/allProduct">Products</Link>
-        </li>
-        <li>
+      <li>
           <Link to="/app/chatbox">Chat</Link>
         </li>
         <li>
-          <Link to="/app/dbProduct">Your Product</Link>
+          <Link to="/app/dbProduct">Products</Link>
         </li>
+        
+        {/* <li>
+          <Link to="/app/dbProduct">Your Product</Link>
+        </li> */}
         <li>
           <Link to="/app/order">Orders</Link>
         </li>
+       
+        <li> <Link to="/app/discountmain">Discount</Link></li>
         <li>
           <Link to="/app/giftCard">Gift Card</Link>
         </li>
-        <li> <Link to="/app/discountmain">Discount</Link></li>
         {/* <li className="dropdown">
           <select className="nav-dropdown" onChange={handleDiscountChange} defaultValue="">
             <option value="" disabled>Discount</option>

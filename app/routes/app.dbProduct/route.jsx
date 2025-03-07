@@ -2,20 +2,30 @@ import React, { useEffect, useState } from "react";
 import { Card, Page, DataTable, Button, TextField } from "@shopify/polaris";
 import { useLocation } from "@remix-run/react";
 import { useNavigate } from "@remix-run/react";
+import image from './image/one.jpg';
 
 const DbProduct = () => {
   const [products, setProducts] = useState([]);
   const [editingProduct, setEditingProduct] = useState(null);
   const [updatedTitle, setUpdatedTitle] = useState("");
+  const [addProduct,setaddProduct]=useState(false);
   const location = useLocation();
   const { orderId } = location.state || {};
   const navigate = useNavigate();
   console.log("orderId producttt",orderId);
-  useEffect(() => {
+  console.log("prodddd length",products.length)
+  const fetchDbProduct=()=>{
     fetch("/api/dbProduct")
-      .then((response) => response.json())
-      .then((data) => setProducts(data?.dbproduct || []))
-      .catch((error) => console.error("Error fetching products:", error));
+    .then((response) => response.json())
+    .then((data) => setProducts(data?.dbproduct || []))
+    .catch((error) => console.error("Error fetching products:", error)); 
+  }
+  useEffect(() => {
+  //  fetch("/api/dbProduct")
+  //     .then((response) => response.json())
+  //     .then((data) => setProducts(data?.dbproduct || []))
+  //     .catch((error) => console.error("Error fetching products:", error)); 
+  fetchDbProduct();
   }, []);
 
   const startEditing = (product) => {
@@ -64,6 +74,28 @@ const DbProduct = () => {
       console.error("Error deleting product:", error);
     }
   }
+  const addtoDatabse = async () => {
+    console.log("clijdkjskdsj")
+    try {
+      const response = await fetch("/api/products", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ products })
+      });
+
+      const result = await response.json();
+      // fetchProducts();
+      setaddProduct(false);
+      fetchDbProduct();
+      console.log("Product save response:", result);
+      // setLoading(false);
+    } catch (error) {
+      console.error("Error adding products:", error);
+      // setLoading(false);
+    }
+  };
   const AddToOrder=async(productId,orderId)=>{
     console.log("productId",productId);
     console.log("orderId",orderId);
@@ -89,7 +121,41 @@ const DbProduct = () => {
       alert("Failed to add product to order!");
     }
   }
+   const fetchProducts = async () => {
+      try {
+        const response = await fetch("/api/products");
+        const result = await response.json();
+        if(result.message){
+          setError(result.message);
+          }
+        
+        console.log("Fetched products:", result);
   
+        // const productList = result?.data?.products?.edges?.map(edge => edge.node) || [];
+        const productList = result.products.map(product => ({
+          ...product,
+          image: product.images?.edges?.length > 0 ? product.images.edges[0].node.originalSrc : null
+        }));
+        setProducts(productList);
+        setaddProduct(true);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
+    
+      var rows2 = products.map((product) => [
+        <img 
+          src={product.image||image } 
+          alt={product.title} 
+          width="50" 
+          height="50"
+        />,
+        product.title.slice(0, 20) ,
+        product.vendor,
+        product.status,
+        product.handle.slice(0,30), 
+      ]);
+    
 
   const rows = products.map((product) => [
     editingProduct === product._id ? (
@@ -111,17 +177,53 @@ const DbProduct = () => {
 
 
   ]);
+ 
 
   return (
-    <Page title="Products From Database">
-      <Card>
-        <DataTable
-          columnContentTypes={["text", "text", "text", "text", "text","text","text"]}
-          headings={["Title", "Vendor", "Status", "Handle", "Update","DElete","add to order"]}
-          rows={rows}
-        />
-      </Card>
-    </Page>
+    <>
+      <div
+        style={{
+          display: "flex",
+          margin: "4rem 2rem 1rem",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "3rem",
+        }}
+      >
+        <Button size="large" onClick={() => fetchProducts()}>
+          Add Product
+        </Button>
+        <Button size="large" onClick={() => addtoDatabse()}>
+          Save Product
+        </Button>
+      </div>
+  
+      {addProduct ? (
+        products.length == 0 ? (
+          <p>No Product To Show</p>
+        ) : (
+          <Page title="Products">
+            <Card>
+              <DataTable
+                columnContentTypes={["text", "text", "text", "text", "text"]}
+                headings={["Image", "Title", "Vendor", "Status", "Handle"]}
+                rows={rows2}
+              />
+            </Card>
+          </Page>
+        )
+      ) : (
+        <Page title="Products From Database">
+          <Card>
+            <DataTable
+              columnContentTypes={["text", "text", "text", "text", "text", "text", "text"]}
+              headings={["Title", "Vendor", "Status", "Handle", "Update", "Delete", "Add to Order"]}
+              rows={rows}
+            />
+          </Card>
+        </Page>
+      )}
+    </>
   );
 };
 

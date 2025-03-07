@@ -97,7 +97,19 @@ export const createLineItemdiscount=async(orderId, description, amount ,admin)=>
                 currencyCode
               }
             }
+            shippingLines{
+              id
+              price{
+                presentmentMoney{
+                  amount
+                  currencyCode
+                }
+              }
+              
+              
+            }
           }
+          
           userErrors {
             field
             message

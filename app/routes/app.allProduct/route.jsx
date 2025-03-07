@@ -72,6 +72,18 @@ if(!error){
     <Button  onClick={addProduct}>Add Product</Button>
 
     </p>
+    {/* <Select
+              label="Add Product"
+              options={[
+                { label: "Select Discount", value: "" },
+                { label: "Amount OFF Order", value: "/app/discount" },
+                { label: "Amount OFF Products", value: "/app/ProdDiscount" },
+                { label: "Buy X Get Y", value: "/app/BuyXgetYdiscount" },
+                { label: "Free Shipping", value: "/app/freeshipDiscount" },
+              ]}
+              onChange={handleDiscountChange}
+              value={selectedDiscount}
+            /> */}
  
   {error ? <div>{error}</div> : <Page title="Products">
       <Card>

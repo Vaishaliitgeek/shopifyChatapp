@@ -68,17 +68,21 @@ const DiscountCodeForm = () => {
       const data = await res.json();
       console.log("dataaaaaa",data)
 
-      if (data.result=="Discount created successfully" && !data.error) {
+      if (data.status && !data.error) {
         setToastMessage("Discount Code Created Successfully!");
       } else {
-        setToastMessage(data.message|| "Failed to create discount");
+        console.log(data?.result[0]?.message)
+        setToastMessage(data?.result[0]?.message|| "Failed to create discount");
       }
     } catch (error) {
       console.error("Error:", error);
       setToastMessage("Failed to create discount code");
     }
+    finally{
+      setLoading(false);
+    }
 
-    setLoading(false);
+    // setLoading(false);
   };
 
   return (
@@ -92,12 +96,14 @@ const DiscountCodeForm = () => {
                 value={formData.title}
                 onChange={(value) => handleChange(value, "title")}
                 requiredIndicator
+                disabled={loading}
               />
               <TextField
                 label="Code"
                 value={formData.code}
                 onChange={(value) => handleChange(value, "code")}
                 requiredIndicator
+                disabled={loading}
               />
               <TextField
                 label="Starts At"
@@ -106,12 +112,14 @@ const DiscountCodeForm = () => {
                 onChange={(value) => handleChange(value, "startsAt")}
                 requiredIndicator
                 error={errors.startsAt} 
+                disabled={loading}
               />
               <TextField
                 label="Ends At"
                 type="datetime-local"
                 value={formData.endsAt}
                 onChange={(value) => handleChange(value, "endsAt")}
+                disabled={loading}
               />
               <TextField
                 label="Discount Percentage"
@@ -119,6 +127,7 @@ const DiscountCodeForm = () => {
                 value={formData.percentage}
                 onChange={(value) => handleChange(value, "percentage")}
                 requiredIndicator
+                disabled={loading}
               />
 
               <Button primary submit loading={loading}>
