@@ -17,10 +17,7 @@ const Navbar = () => {
         <li>
           <Link to="/app/dbProduct">Products</Link>
         </li>
-        
-        {/* <li>
-          <Link to="/app/dbProduct">Your Product</Link>
-        </li> */}
+       
         <li>
           <Link to="/app/order">Orders</Link>
         </li>
@@ -29,19 +26,7 @@ const Navbar = () => {
         <li>
           <Link to="/app/giftCard">Gift Card</Link>
         </li>
-        {/* <li className="dropdown">
-          <select className="nav-dropdown" onChange={handleDiscountChange} defaultValue="">
-            <option value="" disabled>Discount</option>
-            <option value="/app/discount">Amount OFF Order</option>
-            <option value="/app/ProdDiscount">Amount OFF Products</option>
-            <option value="/app/BuyXgetYdiscount">Buy X get Y</option>
-            <option value="/app/freeshipDiscount">Free Shipping</option>
-
-          </select>
-        </li> */}
-        {/* <li>
-          <Link to="/app/flow">Flow</Link>
-        </li> */}
+       
       </ul>
     </nav>
   );

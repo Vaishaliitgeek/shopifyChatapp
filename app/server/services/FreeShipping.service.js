@@ -1,3 +1,5 @@
+import { successMessage,errorMessage } from "../constants/message";
+import { statusCode } from "../constants/constant";
 export const createFreeShippingDiscount=async(variables,admin)=>{
   try {
        console.log("Creating free shipping discount freeeeeeeeeeeee...", variables);
@@ -58,18 +60,23 @@ export const createFreeShippingDiscount=async(variables,admin)=>{
  
        if (userErrors.length > 0) {
          console.error("Shopify discount creation error:", userErrors);
-         return new Response(
-           JSON.stringify({
-             error: "Failed to create discount",
-             shopifyErrors: userErrors.map(err => ({
-               field: err.field,
-               code: err.code,
-               message: err.message
-             })),
-           }),
-           { status: 400, headers: { "Content-Type": "application/json" } }
-         );
-       }
+        //  return {
+        //   status: false,
+        //   message: errorMessage.DISCOUNT_FAILED,
+        //   errors: userErrors.map(err => ({
+        //     field: err.field,
+        //     message: err.message
+        //   })),
+          return {
+            status: false,
+            message: errorMessage.DISCOUNT_FAILED,
+            errors: userErrors.map(err => ({
+              field: err.field,
+              message: err.message
+            })),
+          };
+        };
+      //  }
  
        return new Response(
          JSON.stringify({
@@ -80,10 +87,11 @@ export const createFreeShippingDiscount=async(variables,admin)=>{
        );
      } catch (error) {
        console.error("Error creating discount:", error);
-       return new Response(JSON.stringify({ error: "Failed to create discount" }), {
-         status: 500,
-         headers: { "Content-Type": "application/json" },
-       });
+       return {
+        status: false,
+        message: errorMessage.SERVER_ERROR,
+        error: error.message,
+      };
      }
       }
     

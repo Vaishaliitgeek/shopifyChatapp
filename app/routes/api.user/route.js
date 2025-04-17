@@ -1,8 +1,10 @@
 import { authenticate } from "../../shopify.server";
-// import { User } from "../../models/user.model";
-// import { Chat } from "../../models/chats.model";
+
 import { User } from "../../server/models/user.model";
 import { Chat } from "../../server/models/chats.model";
+import { statusCode } from "../../server/constants/constant";
+import { sendResponse } from "../../server/utils/sendResponse";
+import { successMessage,errorMessage } from "../../server/constants/message";
 
 export const loader = async ({ request }) => {
   try {
@@ -90,7 +92,7 @@ export const action = async ({ request }) => {
       }
 
       if (user) {
-        
+
         if (role === "support" && existingSupport) {
           return Response.json({ message: "A support user already exists", status: 400 });
         }
@@ -107,7 +109,7 @@ export const action = async ({ request }) => {
     }
   } catch (error) {
     console.log("error---", error);
-    return Response.json({ error: "Failed to fetch shop details" }, { status: 500 });
+    return sendResponse(statusCode.INTERNAL_SERVER_ERROR,errorMessage.INTERNAL_SERVER_ERROR,false,error)
   }
 };
 

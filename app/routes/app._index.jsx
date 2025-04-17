@@ -9,14 +9,13 @@ const Register = () => {
   const [formData, setFormData] = useState({
     shopEmail: "",
     customerEmail: "",
-    role: "customer", 
+    role: "customer",
   });
-  
-console.log("formData",formData);
+
+  console.log("formData", formData);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Define the callback function
 
 
     const logindata = async () => {

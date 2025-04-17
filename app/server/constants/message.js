@@ -2,6 +2,7 @@ export const successMessage = {
   DISCOUNT_CREATED: "Discount created successfully",
   PRODUCT_CREATED: "Product created successfully",
   OPERATION_SUCCESS: "Operation completed successfully",
+  PRODUCT_FETCHED_SUCCESSFULLY:"Product fetched successfully"
 };
 export const errorMessage = {
   DISCOUNT_FAILED: "Discount creation Failed",

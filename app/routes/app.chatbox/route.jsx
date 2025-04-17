@@ -334,10 +334,7 @@ import { TextField, Button, Card, Page, Layout } from "@shopify/polaris";
 import { io } from "socket.io-client";
 import { set } from "mongoose";
 
-// const socket = io("http://localhost:3000", {
-//   transports: ["websocket"],
-//   secure: true,
-// });
+
 
 const socket = io("https://6929-49-249-2-6.ngrok-free.app", {
   transports: ["websocket"],
@@ -356,49 +353,10 @@ export default function Chat() {
   const [editContent, setEditContent] = useState({ chatId: "", messageId: "", newMessage: "" });
   const [userStatus, setUserStatus] = useState({});
   const [activeUserId, setactiveUserId] = useState("");
-const[online,setOnline]=useState(false)
-// useEffect(() => {
-//   const callback = async (metrics) => {
-//     console.log("Web Vitals Event Triggered:", metrics); 
+  const [online, setOnline] = useState(false)
 
-//     const monitorUrl = 'https://4ca5-49-249-2-6.ngrok-free.app/api/shopLcp?shop=checkout-thank-you.myshopify.com';
-//     const data = JSON.stringify(metrics);
-    
-//     navigator.sendBeacon(monitorUrl, data);
-//   };
-
-//   if (window?.shopify?.webVitals) {
-//     shopify.webVitals.onReport(callback);
-//   } else {
-//     console.warn("Shopify Web Vitals API not available.");
-//   }
-// }, []);
 
   useEffect(() => {
-    // Define the callback function
-// const callback = async (metrics) => {
-//   const monitorUrl = 'https://4ca5-49-249-2-6.ngrok-free.app/api/shopLcp?shop=checkout-thank-you.myshopify.com';
-//   const data = JSON.stringify(metrics);
-//   console.log(data,"data")
-
-//   navigator.sendBeacon(monitorUrl, data);
-// };
-
-// // Register the callback
-// shopify.webVitals.onReport(callback);
-
-    console.log("rfrfrrfgrgrgg")
-    // const callback = async (metrics) => {
-    //   console.log("Running")
-    //   const monitorUrl = 'https://7cef-49-249-2-6.ngrok-free.app/api/shopLcp?shop=checkout-thank-you.myshopify.comp';
-    //   // const data = JSON.stringify(metrics);
-    // console.log("data",metrics)
-    //   navigator.sendBeacon(monitorUrl, data);
-    // };
-    
-    // // Register the callback`
-    // console.log("run2")
-    // shopify.webVitals.onReport(callback);
     const userIds = location.state;
     if (userIds) setUserId(userIds);
     else handleChats();;
@@ -407,7 +365,7 @@ const[online,setOnline]=useState(false)
   useEffect(() => {
     if (userId) {
       handleChats();
-      socket.emit("joinChat", {userId,activeUserId});
+      socket.emit("joinChat", { userId, activeUserId });
     }
     socket.on("newMessage", (newChat) => {
       setChats(newChat);
@@ -417,18 +375,18 @@ const[online,setOnline]=useState(false)
       setTimeout(() => setTypingMessage(""), 2000);
 
     });
-    socket.on("supportOnline", ({ activeUserId, name , status }) => {
+    socket.on("supportOnline", ({ activeUserId, name, status }) => {
       console.log("supportOnline", activeUserId, name, status);
       setOnline(true)
     });
 
-    socket.on("supportOffline", ({ activeUserId, name , status }) => {
+    socket.on("supportOffline", ({ activeUserId, name, status }) => {
       console.log("supportOffline", activeUserId, name, status);
       setOnline(false)
     });
 
     socket.on("chagedChat", (userId) => {
-      handleChats();      
+      handleChats();
     });
 
     return () => {
@@ -487,7 +445,7 @@ const[online,setOnline]=useState(false)
     setMessage("");
     setSelectedFile(null);
     setPreviewUrl(null);
-    if (fileInputRef.current) { 
+    if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
   };
@@ -502,7 +460,7 @@ const[online,setOnline]=useState(false)
       });
       const data = await res.json();
       if (data.success) {
-        socket.emit("chatupdate", userId );
+        socket.emit("chatupdate", userId);
       } else {
         console.error("Error deleting message:", data.message);
       }
@@ -530,7 +488,7 @@ const[online,setOnline]=useState(false)
           newMessage: "",
           file: "",
         });
-        socket.emit("chatupdate", userId );
+        socket.emit("chatupdate", userId);
       } else {
         console.error("Error updating message:", data.message);
       }
@@ -540,20 +498,11 @@ const[online,setOnline]=useState(false)
   };
 
 
-  // status show krne k liye
-  // useEffect(() => {
-  //   socket.on("userStatus", ({ userId, status }) => {
-  //     setUserStatus((prev) => ({ ...prev, [userId]: status }));
-  //   });
-  
-  //   return () => {
-  //     socket.off("userStatus");
-  //   };
-  // }, []);
+ 
 
   return (
     <Page title="Chat with Support">
- {online ? <p style={{color:"green"}}>Onlinee</p>:<p style={{color:"red"}}>Offline</p>}
+      {online ? <p style={{ color: "green" }}>Onlinee</p> : <p style={{ color: "red" }}>Offline</p>}
 
       <Layout>
         <Layout.Section>

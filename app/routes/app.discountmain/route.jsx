@@ -39,7 +39,6 @@ export default function DiscountsList() {
   return (
     <Page title="Discounts">
       <Layout>
-        {/* Dropdown Navigation */}
         <Layout.Section>
           <Card sectioned>
             <Select
@@ -47,8 +46,8 @@ export default function DiscountsList() {
               options={[
                 { label: "Select Discount", value: "" },
                 { label: "Amount OFF Order", value: "/app/discount" },
-                { label: "Amount OFF Products", value: "/app/ProdDiscount" },
-                { label: "Buy X Get Y", value: "/app/BuyXgetYdiscount" },
+                { label: "Amount OFF Products", value: "/app/prodDiscount" },
+                { label: "Buy X Get Y", value: "/app/buyXgetYdiscount" },
                 { label: "Free Shipping", value: "/app/freeshipDiscount" },
               ]}
               onChange={handleDiscountChange}
@@ -57,7 +56,6 @@ export default function DiscountsList() {
           </Card>
         </Layout.Section>
 
-        {/* Discounts Table */}
         <Layout.Section>
           <Card>
             {loading ? (

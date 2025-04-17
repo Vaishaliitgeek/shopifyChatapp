@@ -1,14 +1,12 @@
 import { authenticate } from "../../shopify.server";
-// import { Product } from "../../models/product.model";
 import { Product } from "../../server/models/product.model";
 
 export async function loader({ request }) {
   try {
-    const { admin ,session} = await authenticate.admin(request);
-    console.log("Session scope",session.scope);
+    const { admin, session } = await authenticate.admin(request);
+    console.log("Session scope", session.scope);
     console.log("Admin Authenticated:", admin);
 
-    // Fetch products from Shopify
     const response = await admin.graphql(
       `#graphql
      query {
@@ -38,38 +36,29 @@ export async function loader({ request }) {
 `
     );
 
-    // console.log("Raw Shopify Response:", response);
 
- 
+
     const data = await response.json();
-    // console.log("Parsed Shopify Data:", data);
 
-    // if (!data || !data.data || !data.data.products) {
-    //   console.error("Invalid Shopify API response:", data);
-    //   return new Response(
-    //     JSON.stringify({ error: "Invalid API response from Shopify" }),
-    //     { headers: { "Content-Type": "application/json" }, status: 500 }
-    //   );
-    // }
 
     const shopifyProducts = data.data.products.edges.map((edge) => edge.node);
     console.log("Shopify Products:", shopifyProducts);
 
-    const existingProducts = await Product.find({}, "productId"); 
+    const existingProducts = await Product.find({}, "productId");
     const existingProductIds = existingProducts.map((product) => product.productId);
 
     const newProducts = shopifyProducts.filter((product) => !existingProductIds.includes(product.id));
     console.log("newProducts", newProducts.length);
-    if(newProducts.length>=5){
+    if (newProducts.length >= 5) {
       return new Response(JSON.stringify({ products: newProducts.slice(0, 5) }), {
         headers: { "Content-Type": "application/json" },
         status: 200,
       });
     }
-    else{
+    else {
       return new Response(JSON.stringify({ message: "Product is Emptyyy" }));
     }
-    
+
 
   } catch (error) {
     console.error("Error in loader:", error);
@@ -82,7 +71,6 @@ export async function loader({ request }) {
 
 
 export async function action({ request }) {
-  console.log("chaliiii")
   if (request.method !== "POST") {
     return new Response("Method Not Allowed", { status: 405 });
   }

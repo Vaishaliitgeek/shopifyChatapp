@@ -1,213 +1,128 @@
 import { authenticate } from "../../shopify.server";
-import { createBuyXgetYdiscount } from "../../server/services/BuyXgetY.service";
-// import { createAmountoffDiscount } from "../../services/amountOff.service.js";
-import { createAmountoffDiscount } from "../../server/services/Amountoff.service";
-import { createLineItemdiscount } from "../../server/services/LineItemDiscount.service";
-import { createFreeShippingDiscount } from "../../server/services/FreeShipping.service";
 
-import { sendResponse } from "../../server/utils/sendResponse";
-import { statusCode } from '../../server/constants/constant';
-import { errorMessage, successMessage } from '../../server/constants/message';
+export async function loader({ request }) {
+  const orderId = 'gid://shopify/Order/6463052480795';
 
-
-
-
-export const loader = async ({ request }) => {
   try {
     const { admin } = await authenticate.admin(request);
 
-    const QUERY = `#graphql
-     query GetAllDiscounts($first: Int = 10, $after: String) {
-  discountNodes(first: $first, after: $after) {
-    edges {
-      node {
-        id
-       
-        discount {
-          __typename
-          ... on DiscountAutomaticBxgy {
-            title
-            startsAt
-            endsAt
-            status
-          }
-          ... on DiscountAutomaticBasic {
-            title
-            startsAt
-            endsAt
-            status
-          }
-          ... on DiscountCodeBasic {
-            title
-            startsAt
-            endsAt
-            status
-            codes(first: 5) {
-              nodes {
-                code
-              }
-            }
-          }
-          ... on DiscountCodeBxgy {
-            title
-            startsAt
-            endsAt
-            status
-            codes(first: 5) {
-              nodes {
-                code
-              }
-            }
-          }
-          ... on DiscountCodeFreeShipping {
-            title
-            startsAt
-            endsAt
-            status
-            codes(first: 5) {
-              nodes {
-                code
+    // 1. Fetch active automatic discounts
+    const discountRes = await admin.graphql(`#graphql
+      query {
+        discountNodes(first: 50) {
+          nodes {
+            id
+            discount {
+              __typename
+              ... on DiscountAutomaticBasic {
+                title
+                startsAt
+                endsAt
+                status
+                customerGets {
+                  value {
+                    ... on DiscountPercentage {
+                      percentage
+                    }
+                  }
+                }
+                minimumRequirement {
+                  ... on DiscountMinimumQuantity {
+                    greaterThanOrEqualToQuantity
+                  }
+                }
               }
             }
           }
         }
       }
-    }
-    pageInfo {
-      hasNextPage
-      endCursor
-    }
-  }
-}`;
+    `);
+    const discountData = await discountRes.json();
+    console.log("----discountData",discountData)
+    const quantityDiscount = discountData.data.discountNodes.nodes.find((node) => {
+      return node.discount.__typename === 'DiscountAutomaticBasic' &&
+        node.discount.minimumRequirement?.greaterThanOrEqualToQuantity;
+    });
 
-    const response = await admin.graphql(QUERY);
-    const dta = await response.json();
-    const resSend = await dta?.data?.discountNodes?.edges;
-    console.log("discount get", dta?.data?.discountNodes?.edges)
-    return resSend;
+    if (!quantityDiscount) {
+      return Response.json({ message: "No quantity-based discount found." });
+    }
+
+    const requiredQty = quantityDiscount.discount.minimumRequirement.greaterThanOrEqualToQuantity;
+    const discountPercent = quantityDiscount.discount.customerGets.value.percentage;
+
+    // 2. Begin order edit session
+    const beginEditRes = await admin.graphql(`#graphql
+      mutation orderEditBegin($id: ID!) {
+        orderEditBegin(id: $id) {
+          calculatedOrder {
+            id
+            lineItems(first: 10) {
+              nodes {
+                id
+                quantity
+              }
+            }
+          }
+          userErrors {
+            field
+            message
+          }
+        }
+      }
+    `, { variables: { id: orderId } });
+
+    const beginData = await beginEditRes.json();
+    const calculatedOrder = beginData.data?.orderEditBegin?.calculatedOrder;
+    if (!calculatedOrder) {
+      return Response.json({ error: "Failed to begin order edit", details: beginData.data?.orderEditBegin?.userErrors }, { status: 400 });
+    }
+
+    // 3. Apply discount manually if eligible
+    for (const item of calculatedOrder.lineItems.nodes) {
+      if (item.quantity >= requiredQty) {
+        const discountApplyRes = await admin.graphql(`#graphql
+          mutation orderEditAddLineItemDiscount($id: ID!, $lineItemId: ID!, $discount: OrderEditAppliedDiscountInput!) {
+            orderEditAddLineItemDiscount(id: $id, lineItemId: $lineItemId, discount: $discount) {
+              calculatedOrder { id }
+              userErrors { field message }
+            }
+          }
+        `, {
+          variables: {
+            id: calculatedOrder.id,
+            lineItemId: item.id,
+            discount: {
+              description: `${discountPercent * 100}% off for quantity >= ${requiredQty}`,
+              percentageValue: discountPercent
+            }
+          }
+        });
+
+        const discountApplyData = await discountApplyRes.json();
+        console.log("Discount Applied:", discountApplyData);
+      }
+    }
+
+    // 4. Commit order
+    const commitRes = await admin.graphql(`#graphql
+      mutation orderEditCommit($id: ID!) {
+        orderEditCommit(id: $id, notifyCustomer: false) {
+          order { id name }
+          userErrors { field message }
+        }
+      }
+    `, { variables: { id: calculatedOrder.id } });
+
+    const commitData = await commitRes.json();
+    if (commitData.data?.orderEditCommit?.order) {
+      return Response.json({ success: true, order: commitData.data.orderEditCommit.order });
+    } else {
+      return Response.json({ error: "Failed to commit order edit" }, { status: 400 });
+    }
+
   } catch (error) {
-    console.error("Error fetching discounts:", error);
-    return Response.json({ error: "Failed to fetch discounts" }, { status: 500 });
+    console.error("Error:", error);
+    return new Response("Internal Server Error", { status: 500 });
   }
-};
-
-
-
-export const action = async ({ request }) => {
-  const url = new URL(request.url);
-  const type = url.searchParams.get("type");
-
-  if (type == "BuyXGetY") {
-    if (request.method === "POST") {
-      try {
-        const { admin } = await authenticate.admin(request);
-        const { variables } = await request.json();
-        const response = await createBuyXgetYdiscount(variables, admin);
-        const data = await response.json();
-        console.log("responseeebuyxgety", data)
-        console.log("dataaaaaadisss", data.shopifyErrors?.[0]?.message || "No Shopify errors");
-        if (data.shopifyErrors && data.shopifyErrors.length > 0) {
-          return sendResponse(statusCode.BAD_REQUEST, false, data.shopifyErrors[0]?.message || "Failed to create discount");
-        }
-
-
-        return sendResponse(statusCode.OK, successMessage.DISCOUNT_CREATED, true, response?.message || "Discount created successfully", response?.data);
-
-
-      } catch (error) {
-        console.error("Error in BuyXgetYdiscount action:", error);
-        return sendResponse(statusCode.INTERNAL_SERVER_ERROR, errorMessage.INTERNAL_SERVER_ERROR, false, "Internal server error");
-      }
-    }
-  }
-  if (type === "discount") {
-    if (request.method === "POST") {
-      try {
-        const { admin } = await authenticate.admin(request);
-        const { variables } = await request.json();
-  
-        const response = await createAmountoffDiscount (variables, admin);
-        console.log("Discount API Response:", response);
-  
-        if (!response.status) {
-          return sendResponse(
-            statusCode.BAD_REQUEST,
-            false,
-            response.message ,
-            response.errors || []
-          );
-        }
-  
-        return sendResponse(
-          statusCode.OK,
-          true,
-          response.message || "Discount created successfully",
-          response.data || {}
-        );
-  
-      } catch (error) {
-        console.error("Error in BuyXGetY discount action:", error);
-        return sendResponse(
-          statusCode.INTERNAL_SERVER_ERROR,
-          false,
-          "Internal server error",
-          error.message
-        );
-      }
-    }
-  }
-  
-  if (type == "freeShipping") {
-    if (request.method === "POST") {
-      try {
-        const { admin } = await authenticate.admin(request);
-        const { variables } = await request.json();
-        const response = await createFreeShippingDiscount(variables, admin);
-        const data = await response.json();
-        console.log("responseeeee", data)
-       
-        if (!response.status) {
-          return sendResponse(
-            statusCode.BAD_REQUEST,
-            false,
-            response.message || "Failed to create discount",
-            response.errors || []
-          );
-        }
-        return sendResponse(statusCode.OK, successMessage.DISCOUNT_CREATED, true, response?.message || "Discount created successfully", response?.data);
-
-
-      } catch (error) {
-        console.error("Error in BuyXgetYdiscount action:", error);
-        return sendResponse(statusCode.INTERNAL_SERVER_ERROR, errorMessage.INTERNAL_SERVER_ERROR, false, "Internal server error");
-      }
-    }
-  }
-  if (type == "LineItemDiscount") {
-    if (request.method === "POST") {
-      try {
-        const { admin } = await authenticate.admin(request);
-        const { orderId, description, amount } = await request.json();
-        const response = await createLineItemdiscount(orderId, description, amount, admin);
-        const data = await response.json();
-        console.log("responseeelineitem", data)
-        console.log("dataaaaalineitem", data.shopifyErrors?.[0]?.message || "No Shopify errors");
-        if (data.shopifyErrors && data.shopifyErrors.length > 0) {
-          return sendResponse(statusCode.BAD_REQUEST, false, data.shopifyErrors[0]?.message || "Failed to create discount");
-        }
-
-
-        return sendResponse(statusCode.OK, successMessage.DISCOUNT_CREATED, true, response?.message || "Discount created successfully", response?.data);
-
-
-      } catch (error) {
-        console.error("Error in BuyXgetYdiscount action:", error);
-        return sendResponse(statusCode.INTERNAL_SERVER_ERROR, errorMessage.INTERNAL_SERVER_ERROR, false, "Internal server error");
-      }
-    }
-  }
-
-
-  return sendResponse(statusCode.METHOD_NOT_ALLOWED, false, "Method not allowed");
-};
-
+}

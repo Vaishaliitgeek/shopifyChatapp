@@ -18,11 +18,11 @@ const Route = () => {
 
   const [loading, setLoading] = useState(false);
   const [toastMessage, setToastMessage] = useState(null);
-  const [errors, setErrors] = useState({}); 
+  const [errors, setErrors] = useState({});
 
   const handleChange = (value, name) => {
     setFormData({ ...formData, [name]: value });
-    setErrors({ ...errors, [name]: "" }); 
+    setErrors({ ...errors, [name]: "" });
   };
 
   const handleSubmit = async () => {
@@ -75,13 +75,13 @@ const Route = () => {
       });
 
       const data = await res.json();
-      console.log("dataa",data)
-      console.log("resss",res)
+      console.log("dataa", data)
+      console.log("resss", res)
 
-      if (data.result=="Discount created successfully" && !data.error) {
+      if (data.status && !data.error) {
         setToastMessage("Discount Code Created Successfully!");
       } else {
-        setToastMessage(data.message|| "Failed to create discount");
+        setToastMessage(data.message || "Failed to create discount");
       }
     } catch (error) {
       console.error("Error:", error);
@@ -110,7 +110,7 @@ const Route = () => {
                 value={formData.startsAt}
                 onChange={(value) => handleChange(value, "startsAt")}
                 requiredIndicator
-                error={errors.startsAt} 
+                error={errors.startsAt}
                 disabled={loading}
               />
               <TextField

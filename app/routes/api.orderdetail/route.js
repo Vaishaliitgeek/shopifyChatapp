@@ -5,7 +5,7 @@ export const loader = async ({ request }) => {
 
     const url = new URL(request.url);
     const orderId = url.searchParams.get("orderId");
-  console.log("orderId backend",orderId);
+    console.log("orderId backend", orderId);
     if (!orderId) {
       return json({ error: "Missing orderId parameter" }, { status: 400 });
     }

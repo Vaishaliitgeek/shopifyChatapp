@@ -4,11 +4,11 @@ import { Page, Card, Form, FormLayout, TextField, Button, Toast, Frame } from "@
 const GiftCard = () => {
   const [formData, setFormData] = useState({
     amount: "100.0",
-    customerId: "gid://shopify/Customer/6743687102541",
+    customerId: "gid://shopify/Customer/7886207680733",
     message: "Happy Birthday!",
     preferredName: "Dad",
     sendNotificationAt: "2025-04-01T12:00:00Z",
-    recepientId: "gid://shopify/Customer/6743687102541",
+    recepientId: "gid://shopify/Customer/7886207680733",
   });
 
   const [loading, setLoading] = useState(false);
@@ -118,13 +118,13 @@ const GiftCard = () => {
         </Form>
       </Card>
 
-      {response && (
+      {/* {response && (
         <Card title="📩 Response" sectioned>
           <pre style={{ background: "#f4f6f8", padding: "10px", borderRadius: "5px", overflowX: "auto" }}>
             {JSON.stringify(response, null, 2)}
           </pre>
         </Card>
-      )}
+      )} */}
 
       {toastActive && <Toast content="Gift Card Created Successfully!" onDismiss={() => setToastActive(false)} />}
     </Page>

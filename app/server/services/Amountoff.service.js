@@ -79,7 +79,7 @@ export const createAmountoffDiscount=async(variables,admin)=>{
       console.error("Error creating discount code:", error);
       return {
         status: false,
-        message: "Internal Server Error",
+        message: errorMessage.SERVER_ERROR,
         error: error.message,
       };
     }

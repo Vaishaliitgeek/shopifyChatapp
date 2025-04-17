@@ -1,10 +1,5 @@
 import { authenticate } from "../../shopify.server";
 import { json } from "@remix-run/node";
-
-
-// import { authenticate } from "../../shopify.server";
-// import { json } from "@remix-run/node";
-
 export const loader = async ({ request }) => {
   try {
     const { admin } = await authenticate.admin(request);
@@ -53,7 +48,6 @@ export const loader = async ({ request }) => {
 
     const data = await response.json();
 
-    // Send the entire data as received from Shopify
     return json(data);
   } catch (error) {
     console.error("Error fetching orders:", error);

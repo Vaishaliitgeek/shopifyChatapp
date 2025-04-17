@@ -1,4 +1,3 @@
-// import { Product } from "../../models/product.model"
 import {Product} from "../../server/models/product.model.js"
 
 export const loader=async({request})=>{
@@ -12,3 +11,4 @@ export const loader=async({request})=>{
     return Response.json({message:"Error",status:500});
   }
 }
+

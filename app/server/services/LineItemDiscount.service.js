@@ -1,4 +1,3 @@
-// import { authenticate } from "../../shopify.server"
 export const createLineItemdiscount=async(orderId, description, amount ,admin)=>{
   console.log("dataaaaaa",orderId, description, amount ,admin)
   try {
@@ -55,7 +54,7 @@ export const createLineItemdiscount=async(orderId, description, amount ,admin)=>
             );
           }
           
-          const calculatedLineItemId = calculatedLineItems[0].id; // If you want the first line item
+          const calculatedLineItemId = calculatedLineItems[0].id; 
           // const calculatedLineItemId = calculatedLineItems.find(item => item.id === someMatchingId)?.id; // If you have logic to match a specific item
           console.log(" calculatedLineItemId", calculatedLineItemId)
           if (!calculatedLineItemId) {
@@ -120,7 +119,9 @@ export const createLineItemdiscount=async(orderId, description, amount ,admin)=>
         discount: {
           description,
           fixedValue: { amount, currencyCode: "AED" },
+          
         },
+         targetType: "LINE_ITEM",
         id: calculatedOrderId,
         lineItemId: calculatedLineItemId, 
       }}
@@ -168,13 +169,21 @@ export const createLineItemdiscount=async(orderId, description, amount ,admin)=>
           console.log("finalll",final)
       
           if (commitResponse?.data?.orderEditCommit?.userErrors.length > 0) {
-            return new Response(
-              JSON.stringify({
-                error: "Failed to commit order edit",
-                details: commitResponse.data.orderEditCommit.userErrors,
-              }),
-              { status: 400 }
-            );
+            // return new Response(
+            //   JSON.stringify({
+            //     error: "Failed to commit order edit",
+            //     details: commitResponse.data.orderEditCommit.userErrors,
+            //   }),
+            //   { status: 400 }
+            // );
+             return {
+                      status: false,
+                      message: errorMessage.DISCOUNT_FAILED,
+                      errors: userErrors.map(err => ({
+                        field: err.field,
+                        message: err.message
+                      })),
+                    }
           }
       
           return new Response(
@@ -183,9 +192,10 @@ export const createLineItemdiscount=async(orderId, description, amount ,admin)=>
           );
         } catch (error) {
           console.error("Server Error:", error);
-          return new Response(
-            JSON.stringify({ error: "Server error", details: error.message }),
-            { status: 500 }
-          );
+           return {
+                  status: false,
+                  message: errorMessage.SERVER_ERROR,
+                  error: error.message,
+                };
         }
       };

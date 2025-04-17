@@ -14,11 +14,11 @@ const DiscountCodeForm = () => {
 
   const [loading, setLoading] = useState(false);
   const [toastMessage, setToastMessage] = useState(null);
-  const [errors, setErrors] = useState({}); 
+  const [errors, setErrors] = useState({});
 
   const handleChange = (value, name) => {
     setFormData({ ...formData, [name]: value });
-    setErrors({ ...errors, [name]: "" }); 
+    setErrors({ ...errors, [name]: "" });
   };
 
   const handleSubmit = async () => {
@@ -40,7 +40,7 @@ const DiscountCodeForm = () => {
       basicCodeDiscount: {
         title: formData.title,
         code: formData.code,
-        startsAt: formData.startsAt, 
+        startsAt: formData.startsAt,
         customerSelection: {
           customers: { add: [formData.customerId] },
         },
@@ -53,7 +53,7 @@ const DiscountCodeForm = () => {
         },
         usageLimit: 100,
         appliesOncePerCustomer: true,
-        ...(formData.endsAt.trim() !== "" && { endsAt: formData.endsAt }) 
+        ...(formData.endsAt.trim() !== "" && { endsAt: formData.endsAt })
       },
     };
 
@@ -66,23 +66,22 @@ const DiscountCodeForm = () => {
       });
 
       const data = await res.json();
-      console.log("dataaaaaa",data)
+      console.log("dataaaaaa", data)
 
       if (data.status && !data.error) {
         setToastMessage("Discount Code Created Successfully!");
       } else {
         console.log(data?.result[0]?.message)
-        setToastMessage(data?.result[0]?.message|| "Failed to create discount");
+        setToastMessage(data?.result[0]?.message || "Failed to create discount");
       }
     } catch (error) {
       console.error("Error:", error);
       setToastMessage("Failed to create discount code");
     }
-    finally{
+    finally {
       setLoading(false);
     }
 
-    // setLoading(false);
   };
 
   return (
@@ -111,7 +110,7 @@ const DiscountCodeForm = () => {
                 value={formData.startsAt}
                 onChange={(value) => handleChange(value, "startsAt")}
                 requiredIndicator
-                error={errors.startsAt} 
+                error={errors.startsAt}
                 disabled={loading}
               />
               <TextField
@@ -149,51 +148,3 @@ export default DiscountCodeForm;
 
 
 
-// discount on line item
-
-// mutation orderEditAddLineItemDiscount(
-//   $discount: OrderEditAppliedDiscountInput!,
-//   $id: ID!,
-//   $lineItemId: ID!
-// ) {
-//   orderEditAddLineItemDiscount(discount: $discount, id: $id, lineItemId: $lineItemId) {
-//     addedDiscountStagedChange {
-//       id
-//     }
-//     calculatedLineItem {
-//       id
-//       calculatedDiscountAllocations {
-//         allocatedAmountSet {
-//           presentmentMoney {
-//             amount
-//             currencyCode
-//           }
-//         }
-//       }
-//     }
-//     calculatedOrder {
-//       id
-//       totalPriceSet {
-//         presentmentMoney {
-//           amount
-//           currencyCode
-//         }
-//       }
-//     }
-//     userErrors {
-//       field
-//       message
-//     }
-//   }
-// }
-// {
-//   "discount": {
-//     "description": "Special Discount2",
-//     "fixedValue": {
-//       "amount": "40.00",
-//       "currencyCode": "AED"
-//     }
-//   },
-//   "id": "gid://shopify/CalculatedOrder/114604114141",
-//   "lineItemId": "gid://shopify/CalculatedLineItem/7ace85af-14f6-4e18-9107-782166cd4380"
-// }

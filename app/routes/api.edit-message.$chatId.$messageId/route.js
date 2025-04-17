@@ -1,13 +1,11 @@
-
-
-// import { Chat } from "../../models/chats.model";
+import { statusCode } from "../../server/constants/constant";
+import { errorMessage } from "../../server/constants/message";
 import { Chat } from "../../server/models/chats.model";
 
 export const action = async ({ request, params }) => {
   const method = request.method;
 
   if (method === "DELETE") {
-    // DELETE Request - Message Delete Logic
     try {
       const { chatId, messageId } = params; 
       const result = await Chat.updateOne(
@@ -16,13 +14,13 @@ export const action = async ({ request, params }) => {
       );
 
       if (result.modifiedCount > 0) {
-        return Response.json({ success: true, message: "Message deleted successfully" });
+        return Response.json({ success: true, message: "Message deleted successfully" },{status:statusCode.OK});
       } else {
-        return Response.json({ success: false, message: "Message not found" }, { status: 404 });
+        return Response.json({ success: false, message: errorMessage.NOT_FOUND }, { status: statusCode.NOT_FOUND });
       }
     } catch (error) {
       console.error("Error deleting message:", error);
-      return Response.json({ success: false, message: "Internal Server Error" }, { status: 500 });
+      return Response.json({ success: false, message: errorMessage.SERVER_ERROR}, { status: statusCode.INTERNAL_SERVER_ERROR});
     }
   } else if (method === "PUT") {
     try {
@@ -34,6 +32,7 @@ export const action = async ({ request, params }) => {
         { _id: chatId, "messages._id": messageId },
         { $set: { "messages.$.message": newMessage } }
       );
+      
 
       if (result.modifiedCount > 0) {
         return Response.json({ success: true, message: "Message updated successfully" });

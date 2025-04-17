@@ -14,11 +14,11 @@ const Route = () => {
 
   const [loading, setLoading] = useState(false);
   const [toastMessage, setToastMessage] = useState(null);
-  const [errors, setErrors] = useState({}); // Error state
+  const [errors, setErrors] = useState({});
 
   const handleChange = (value, name) => {
     setFormData({ ...formData, [name]: value });
-    setErrors({ ...errors, [name]: "" }); 
+    setErrors({ ...errors, [name]: "" });
   };
 
   const handleSubmit = async () => {
@@ -43,7 +43,7 @@ const Route = () => {
       freeShippingCodeDiscount: {
         title: formData.title,
         code: formData.code,
-        startsAt: formData.startsAt, 
+        startsAt: formData.startsAt,
         appliesOncePerCustomer: false,
         minimumRequirement: {
           subtotal: { greaterThanOrEqualToSubtotal: parseFloat(formData.minimumSubtotal) },
@@ -61,16 +61,15 @@ const Route = () => {
       });
 
       const data = await res.json();
-      console.log("responseeeee",data)
-      // console.log("dataaaaaaa",data.shopifyErrors[0].message)
+      console.log("responseeeee", data)
 
       if (data.status && !data.error) {
         setToastMessage("Discount Code Created Successfully!");
       } else {
-        setToastMessage(data?.result[0]?.message|| "Failed to create discount");
+        setToastMessage(data?.result[0]?.message || "Failed to create discount");
 
       }
-      
+
     } catch (error) {
       console.error("Error:", error);
       setToastMessage("Failed to create discount");
@@ -97,7 +96,7 @@ const Route = () => {
                 value={formData.code}
                 onChange={(value) => handleChange(value, "code")}
                 requiredIndicator
-                error={errors.code} 
+                error={errors.code}
                 disabled={loading}
               />
               <TextField
@@ -106,7 +105,7 @@ const Route = () => {
                 value={formData.startsAt}
                 onChange={(value) => handleChange(value, "startsAt")}
                 requiredIndicator
-                error={errors.startsAt} 
+                error={errors.startsAt}
                 disabled={loading}
               />
               <TextField
@@ -116,13 +115,7 @@ const Route = () => {
                 onChange={(value) => handleChange(value, "endsAt")}
                 disabled={loading}
               />
-              {/* <TextField
-                label="Minimum Subtotal ($)"
-                type="number"
-                value={formData.minimumSubtotal}
-                onChange={(value) => handleChange(value, "minimumSubtotal")}
-                requiredIndicator
-              /> */}
+
 
               <Button primary submit loading={loading}>
                 {loading ? "Processing..." : "Create Discount"}

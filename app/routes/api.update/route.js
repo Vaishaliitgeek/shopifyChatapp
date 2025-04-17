@@ -1,5 +1,4 @@
 import { authenticate } from "../../shopify.server";
-// import { Product } from "../../models/product.model";
 import { Product } from "../../server/models/product.model";
 
 export const loader = async ({ request}) => {
@@ -14,7 +13,6 @@ export const loader = async ({ request}) => {
 
 
 
-// import { Product } from "../../models/product.model";
 export const action = async ({ request }) => {
   if(request.method==='POST'){
     try {
