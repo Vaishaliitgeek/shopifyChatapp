@@ -430,26 +430,26 @@ export async function loader({ request }) {
     const discountData = await discountRes.json();
 
     const quantityDiscounts = discountData.data.discountNodes.nodes
-  .filter(node => {
-    const d = node.discount;
-    return (
-      (d.__typename === "DiscountAutomaticBasic" || d.__typename === "DiscountCodeBasic") &&
-      d.minimumRequirement?.greaterThanOrEqualToQuantity &&
-      d.customerGets.value?.percentage
-    );
-  })
-  .map(node => {
-    const d = node.discount;
-    return {
-      type: d.__typename,
-      title: d.title,
-      minQty: Number(d.minimumRequirement.greaterThanOrEqualToQuantity), // <-- convert here
-      percent: d.customerGets.value.percentage,
-      code: d.__typename === "DiscountCodeBasic" ? d.codes?.nodes?.[0]?.code : null,
-    };
-  });
-  
-console.log("-----quantityDiscounts",quantityDiscounts)
+      .filter(node => {
+        const d = node.discount;
+        return (
+          (d.__typename === "DiscountAutomaticBasic" || d.__typename === "DiscountCodeBasic") &&
+          d.minimumRequirement?.greaterThanOrEqualToQuantity &&
+          d.customerGets.value?.percentage && d.status==='ACTIVE'
+        );
+      })
+      .map(node => {
+        const d = node.discount;
+        return {
+          type: d.__typename,
+          title: d.title,
+          minQty: Number(d.minimumRequirement.greaterThanOrEqualToQuantity),
+          percent: d.customerGets.value.percentage,
+          code: d.__typename === "DiscountCodeBasic" ? d.codes?.nodes?.[0]?.code : null,
+        };
+      });
+
+    console.log("-----quantityDiscounts", quantityDiscounts);
 
     if (!quantityDiscounts.length) {
       return Response.json({ message: "No quantity-based discounts available." });
@@ -508,37 +508,9 @@ console.log("-----quantityDiscounts",quantityDiscounts)
     if (!targetLineItem) {
       return Response.json({ error: "Line item not found in calculated order" }, { status: 404 });
     }
-    // const existingDiscountId = targetLineItem.calculatedDiscountAllocations[0]?.discountApplication?.id;
-    // const quantity = Number(targetLineItem.quantity);
-    
-    // // Check if any discount is still applicable for the current quantity
-    // const stillApplicable = quantityDiscounts.some(d => quantity >= d.minQty);
-    
-    // console.log("---------existingDiscountId", existingDiscountId);
-    // console.log("---------stillApplicable", stillApplicable);
-    
-    // // Only remove discount if no discount is applicable anymore
-    // if (existingDiscountId && !stillApplicable) {
-    //   await admin.graphql(`mutation orderEditRemoveLineItemDiscount(
-    //     $id: ID!, $discountApplicationId: ID!
-    //   ) {
-    //     orderEditRemoveLineItemDiscount(
-    //       id: $id, discountApplicationId: $discountApplicationId
-    //     ) {
-    //       calculatedOrder { id }
-    //       userErrors { field message }
-    //     }
-    //   }`, {
-    //     variables: {
-    //       id: calculatedOrder.id,
-    //       discountApplicationId: existingDiscountId,
-    //     },
-    //   });
-    // }
-    
+
     // Remove any existing discount
     const existingDiscountId = targetLineItem.calculatedDiscountAllocations[0]?.discountApplication?.id;
-    console.log("---------existingDiscountId",existingDiscountId)
     if (existingDiscountId) {
       await admin.graphql(`mutation orderEditRemoveLineItemDiscount(
         $id: ID!, $discountApplicationId: ID!
@@ -557,14 +529,15 @@ console.log("-----quantityDiscounts",quantityDiscounts)
       });
     }
 
-console.log("-------------quantity",targetLineItem.quantity)
-    // Determine best discount based on quantity
+    console.log("-------------quantity", targetLineItem.quantity);
     const applicableDiscounts = quantityDiscounts
       .filter(d => targetLineItem.quantity >= d.minQty)
-      .sort((a, b) => b.percent - a.percent); // Highest discount first
-console.log("-------applicableDiscount",applicableDiscounts)
+      .sort((a, b) => b.percent - a.percent);
+
+    console.log("-------applicableDiscount", applicableDiscounts);
     const bestDiscount = applicableDiscounts[0];
-console.log("------bestDiscount",bestDiscount)
+    console.log("------bestDiscount", bestDiscount);
+
     if (bestDiscount) {
       await admin.graphql(`mutation orderEditAddLineItemDiscount(
         $id: ID!, $lineItemId: ID!, $discount: OrderEditAppliedDiscountInput!
@@ -585,14 +558,49 @@ console.log("------bestDiscount",bestDiscount)
             description: bestDiscount.code
               ? `Discount code ${bestDiscount.code} (${bestDiscount.percent * 100}%)`
               : `${bestDiscount.percent * 100}% off for quantity >= ${bestDiscount.minQty}`,
-            percentValue: bestDiscount.percent*100,
+            percentValue: bestDiscount.percent * 100,
           },
         },
       });
     }
-    
 
-    // Commit the order edit
+    // // Add refund discrepancy check before commit
+    // const finalOrderRes = await admin.graphql(`
+    //   query($id: ID!) {
+    //     order(id: $id) {
+    //       totalPriceSet { shopMoney { amount } }
+    //       totalRefundedSet { shopMoney { amount } }
+    //       transactions(first: 10) {
+    //         amount
+    //         kind
+    //       }
+    //     }
+    //   }
+    // `, { variables: { id: orderId } });
+    // const finalOrderData = await finalOrderRes.json();
+    // const finalOrder =  finalOrderData.data?.order;
+    // console.log("------------finalOrder",finalOrder)
+    // const totalPrice = parseFloat(finalOrder?.totalPriceSet?.shopMoney.amount);
+    // const totalRefunded = parseFloat(finalOrder?.totalRefundedSet?.shopMoney.amount);
+    // const totalPaid = finalOrder?.transactions
+    //   .filter(t => t.kind === "SALE")
+    //   .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+
+    // const refundOwed = totalPaid - totalRefunded - totalPrice;
+    // console.log("Refund Owed (calculated):", refundOwed.toFixed(2));
+
+    // if (refundOwed > 0 && refundOwed < 0.02) {
+    //   await admin.graphql(`mutation orderEditCommit($id: ID!) {
+    //     orderEditCommit(id: $id, notifyCustomer: false) {
+    //       order { id name }
+    //       userErrors { field message }
+    //     }
+    //   }`, { variables: { id: calculatedOrder.id } });
+
+    //   return Response.json({ message: "Cleared ₹0.01 refund discrepancy via edit commit." });
+    // }
+
+    //  Fallback commit
     const commitRes = await admin.graphql(`mutation orderEditCommit($id: ID!) {
       orderEditCommit(id: $id, notifyCustomer: false) {
         order { id name }

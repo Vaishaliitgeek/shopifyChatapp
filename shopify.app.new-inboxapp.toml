@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "86aa2065cc8329d2caea22b686784433"
-application_url = "https://differently-fraser-speak-width.trycloudflare.com"
+application_url = "https://interests-bruce-famous-create.trycloudflare.com"
 embedded = true
 name = "new-inboxapp"
 handle = "new-inboxapp-65"
@@ -19,9 +19,9 @@ scopes = "read_customers,read_orders,read_product_listings,write_customers,write
 
 [auth]
 redirect_urls = [
-  "https://differently-fraser-speak-width.trycloudflare.com/auth/callback",
-  "https://differently-fraser-speak-width.trycloudflare.com/auth/shopify/callback",
-  "https://differently-fraser-speak-width.trycloudflare.com/api/auth/callback"
+  "https://interests-bruce-famous-create.trycloudflare.com/auth/callback",
+  "https://interests-bruce-famous-create.trycloudflare.com/auth/shopify/callback",
+  "https://interests-bruce-famous-create.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]
